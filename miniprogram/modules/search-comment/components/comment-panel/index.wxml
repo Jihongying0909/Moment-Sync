@@ -1,0 +1,17 @@
+<view class="comment-panel paper">
+  <view class="comment-heading"><text>留一句同频的话</text><text class="count">{{loaded ? total : '…'}}</text></view>
+  <view class="muted">认真回应，让校园的回忆多一份温度。</view>
+  <view class="composer">
+    <textarea class="comment-input" value="{{content}}" maxlength="500" placeholder="写下你的感受…" disabled="{{sending}}" bindinput="onInput" aria-label="评论内容，最多500个字符" />
+    <view class="compose-footer"><text class="muted">{{content.length}} / 500</text><button class="button primary" loading="{{sending}}" disabled="{{sending || !postId}}" bindtap="onSubmit">{{sending ? '发送中…' : '留下评论'}}</button></view>
+    <view wx:if="{{submitError}}" class="error feedback">{{submitError}}</view>
+  </view>
+  <view wx:if="{{error}}" class="error feedback"><text>{{error}}</text><button class="link-button" bindtap="onRetry">重试加载</button></view>
+  <view wx:if="{{loading && page === 0}}" class="muted feedback">正在翻阅留言…</view>
+  <view wx:if="{{loaded && total === 0 && !error}}" class="empty-comment">还没有留言，来写下第一句吧。</view>
+  <view wx:for="{{items}}" wx:key="id" class="comment">
+    <view class="author">{{item.author.nickname}}</view>
+    <view class="comment-text">{{item.content}}</view><view class="comment-time">{{item.createdAt}}</view>
+  </view>
+  <button wx:if="{{hasMore && !error}}" class="link-button more" disabled="{{loading}}" bindtap="onMore">{{loading ? '加载中…' : '再看看留言'}}</button>
+</view>
