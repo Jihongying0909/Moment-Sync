@@ -5,11 +5,13 @@
 
   <view class="paper form-paper">
     <view class="field-label">标题</view>
-    <input class="field-input" value="{{title}}" maxlength="100" placeholder="给这段时光起个名字" aria-label="印记标题，最多100字" bindinput="onTitleInput" />
+    <input class="field-input" value="{{title}}" maxlength="100" placeholder="给这段时光起个名字" placeholder-style="color:#95988b;font-size:28rpx;" aria-label="印记标题，最多100字" bindinput="onTitleInput" />
     <view class="counter">{{titleLength}} / 100</view>
 
     <view class="field-label content-label">正文</view>
-    <textarea class="field-textarea" value="{{content}}" maxlength="2000" auto-height placeholder="今天发生了什么值得记住的小事？" aria-label="印记正文，最多2000字" bindinput="onContentInput" />
+    <view class="field-textarea-box">
+      <textarea class="field-textarea" value="{{content}}" maxlength="2000" auto-height placeholder="今天发生了什么值得记住的小事？" placeholder-style="color:#95988b;font-size:28rpx;line-height:42rpx;" aria-label="印记正文，最多2000字" bindinput="onContentInput" />
+    </view>
     <view class="counter">{{contentLength}} / 2000</view>
 
     <view class="divider"></view>

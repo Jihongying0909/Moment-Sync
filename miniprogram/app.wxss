@@ -99,7 +99,8 @@ button {
 
 .field-input {
   width: 100%;
-  min-height: 84rpx;
+  height: 84rpx;
+  line-height: 84rpx;
   padding: 0 22rpx;
   box-sizing: border-box;
   background: #fbf8ee;

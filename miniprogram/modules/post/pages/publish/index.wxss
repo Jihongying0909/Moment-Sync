@@ -1,18 +1,36 @@
 @import "../../style.wxss";
 
 .form-paper { padding: 28rpx 24rpx 8rpx; }
-.field-input, .field-textarea {
+.field-input {
   width: 100%;
+  height: 84rpx;
+  line-height: 84rpx;
   box-sizing: border-box;
-  padding: 18rpx 20rpx;
+  padding: 0 22rpx;
   background: #ffffff;
   border: 2rpx solid #b8bdaf;
   border-radius: 14rpx 8rpx 14rpx 8rpx;
   color: #302d28;
   font-size: 28rpx;
-  line-height: 1.6;
 }
-.field-textarea { min-height: 200rpx; }
+.field-textarea-box {
+  padding: 18rpx 22rpx;
+  background: #ffffff;
+  border: 2rpx solid #b8bdaf;
+  border-radius: 14rpx 8rpx 14rpx 8rpx;
+  box-sizing: border-box;
+}
+.field-textarea {
+  display: block;
+  width: 100%;
+  min-height: 168rpx;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #302d28;
+  font-size: 28rpx;
+  line-height: 42rpx;
+}
 .content-label { margin-top: 24rpx; }
 .counter { margin: 8rpx 0 4rpx; text-align: right; color: #8b8c80; font-size: 22rpx; }
 .divider { margin: 24rpx 0; border-top: 2rpx dashed #cdd2c5; }
