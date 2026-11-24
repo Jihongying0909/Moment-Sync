@@ -32,9 +32,9 @@
 | 印记 | GET | `/api/posts` | 用户 | 江可妮 | 待设计 |
 | 印记 | GET | `/api/posts/{id}` | 用户 | 江可妮 | 待设计 |
 | 媒体 | POST | `/api/files/images` | 用户 | 江可妮 | 待设计 |
-| 搜索 | GET | `/api/posts/search` | 用户 | 陈昂雄 | 可联调（独立模块） |
-| 评论 | POST | `/api/posts/{id}/comments` | 用户 | 陈昂雄 | 可联调（独立模块） |
-| 评论 | GET | `/api/posts/{id}/comments` | 用户 | 陈昂雄 | 可联调（独立模块） |
+| 搜索 | GET | `/api/posts/search` | 用户 | 陈昂雄 | 可联调 |
+| 评论 | POST | `/api/posts/{id}/comments` | 用户 | 陈昂雄 | 可联调 |
+| 评论 | GET | `/api/posts/{id}/comments` | 用户 | 陈昂雄 | 可联调 |
 | 后台 | POST | `/api/admin/auth/login` | 公开 | 周黎 | 待设计 |
 | 后台 | GET | `/api/admin/users` | 管理员 | 周黎 | 待设计 |
 | 后台 | GET | `/api/admin/posts` | 管理员 | 周黎 | 待设计 |
@@ -58,4 +58,4 @@
 
 ## 陈昂雄：搜索、评论与基础内容安全
 
-上述三个接口的请求参数、分页结构、成功响应、错误码、鉴权和集成要求见 [模块接口与接入说明](modules/search-comment-cax.md#api-契约)。实现遵循现有表结构和统一响应，模块测试已通过，真实 JWT 与小程序宿主待联调。
+上述三个接口的请求参数、分页结构、成功响应、错误码、鉴权和集成要求见 [模块接口与接入说明](modules/search-comment-cax.md#api-契约)。实现遵循现有表结构和统一响应，后端集成测试覆盖真实 JWT，小程序宿主待联调。

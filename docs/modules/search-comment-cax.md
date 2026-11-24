@@ -1,13 +1,12 @@
 # 陈昂雄：搜索、评论与基础内容安全
 
-交付分支：`feature/search-cax`。基于仓库 `8b8a390`，状态：**模块实现及自动化测试完成，待宿主联调**。
+搜索和评论已接入统一的 Spring Boot 后端及 JWT 鉴权，小程序页面仍需按下文接入。
 
 ## 范围与文件
 
-- `backend/search-comment`：独立 Java 17 / Spring Boot 3.5.7 Maven library，包含搜索、评论 Controller / Service / Repository，以及可复用的 `ContentPolicy`。
+- `backend/src/main/java/com/momentsync/` 的 `post`、`comment` 和 `moderation` 包分别包含搜索、评论和内容检查实现。
 - `miniprogram/modules/search-comment`：原生微信小程序搜索入口、搜索及结果页、评论组件和接口客户端。
-- `docs/api.md`：只更新陈昂雄的三个接口条目，接口详情见本文。
-- `docs/tasks.md`：只更新陈昂雄的任务状态。
+- [接口文档](../api.md)和[任务看板](../tasks.md)记录接口及联调进度。
 
 直接使用已有 `post`、`post_tag`、`tag`、`post_media`、`comment`、`user` 表，没有修改数据库字段，没有创建登录、发布、首页、详情页、后台或全局应用骨架。评论删除是本周可选项，本模块不提供删除 API。
 
@@ -15,43 +14,17 @@
 
 ## 后端接入（吴家裔）
 
-本目录是可构建的 library，不是第二套 Spring Boot 应用；生产入口、数据源、JWT、安全过滤器、MySQL 驱动、全局跨域等继续由公共后端提供。
+按[后端启动说明](../../backend/README.md)构建并启动统一应用。搜索和评论通过 `auth.CurrentUserProvider` 读取已验证的用户身份，三个接口均需要登录。评论作者取自登录身份。
 
-```bash
-# 项目根目录；Java 17+、Maven 3.9+
-mvn -f backend/search-comment/pom.xml clean install
-```
+`post` 统一维护 `PUBLISHED + PUBLIC` 可见性规则。搜索使用绑定参数、关键词文字匹配和批量标签查询。评论写入在同一事务中复查账号、锁定并检查目标印记，再向 `comment` 表插入，使下架与评论校验串行。
 
-在后端宿主添加依赖（也可以由后端负责人将此目录加入其 Maven 多模块工程）：
-
-```xml
-<dependency>
-  <groupId>com.momentsync</groupId>
-  <artifactId>search-comment</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
-</dependency>
-```
-
-宿主配置使用 `@Import(InteractionConfiguration.class)`。配置所在包为 `com.momentsync.interaction`。需要宿主提供：
-
-| 依赖 | 契约 |
-| --- | --- |
-| `NamedParameterJdbcTemplate` | 连接仓库 schema 初始化后的 MySQL；Spring Boot JDBC 自动配置可提供 |
-| `PlatformTransactionManager` | Spring JDBC 事务管理器，保证发表评论的行锁与插入在同一事务 |
-| `CurrentUserProvider` Bean | `long requireUserId()`；只信任已验证 JWT 的 ACTIVE 用户；失败抛 `new InteractionException(401, 40101, "请先登录")` |
-| MySQL Connector/J | 由宿主运行时提供；本 library 的 MySQL 驱动仅供测试 |
-
-`CurrentUserProvider` 没有默认实现，未接入时启动会失败，避免未完成鉴权就对外开放。请在现有 JWT 过滤器完成签名、有效期和用户状态检查后，从其可信上下文读取用户 ID。搜索和评论读取也必须登录。禁止通过任意请求 header / body 自建用户身份。
-
-HTTP 路由只占用 `/api/posts/search` 和 `/api/posts/{id}/comments`。模块 Advice 只作用于 `InteractionController`，响应保持仓库的 `{code,message,data}` 格式。错误码暂为本模块定义；公共负责人如需统一编号，应通过模块适配同步本文，不要重写 JWT 或全局异常设施。
-
-本模块没有组件扫描其他业务目录。内部按 `PostSearchRepository`、`CommentRepository` 接口分层；默认 JDBC 实现只读其他业务表，只向 `comment` 写入。搜索使用绑定参数、关键词文字匹配、批量标签查询；读取与评论均限定 `PUBLISHED + PUBLIC`。评论写入前锁定目标印记行，使下架与评论校验串行。
+HTTP 路由为 `/api/posts/search` 和 `/api/posts/{id}/comments`，统一使用 `{code,message,data}` 响应格式。错误码见下文。
 
 ## 敏感词接入（江可妮、吴家裔）
 
-评论已自动调用 `ContentPolicy.check(content)`。发布印记时可注入同一个接口，分别对标题、正文调用 `check`，本次未修改江可妮的发布逻辑。
+评论已自动调用 `ContentPolicy.check(content)`。发布印记时可注入同一个接口，分别对标题、正文调用 `check`。
 
-默认词表在 `backend/search-comment/src/main/resources/interaction-sensitive-words.txt`，UTF-8，一行一个词，支持空行和 `#` 注释。当前演示词为“敏感词测试”“代开发票”“办假证”。可在宿主配置：
+默认词表在 `backend/src/main/resources/interaction-sensitive-words.txt`，UTF-8，一行一个词，支持空行和 `#` 注释。当前演示词为“敏感词测试”“代开发票”“办假证”。可在后端配置：
 
 ```properties
 moment.interaction.sensitive-words=file:/absolute/path/sensitive-words.txt
@@ -205,7 +178,7 @@ GET /api/posts/search?keyword=晚霞&tagId=2&page=1&pageSize=20
 
 ```bash
 # 在仓库根目录
-mvn -f backend/search-comment/pom.xml test
+mvn -f backend/pom.xml -Dtest=InteractionIntegrationTest test
 node --test miniprogram/modules/search-comment/tests/*.test.cjs
 ```
 
@@ -217,14 +190,14 @@ node --test miniprogram/modules/search-comment/tests/*.test.cjs
 export INTERACTION_TEST_DB_URL='jdbc:mysql://127.0.0.1:13316/interaction_test_cax?serverTimezone=Asia/Shanghai'
 export INTERACTION_TEST_DB_USER='your_test_user'
 # INTERACTION_TEST_DB_PASSWORD 由本机环境提供，不写入仓库
-mvn -f backend/search-comment/pom.xml test
+mvn -f backend/pom.xml -Dtest=InteractionIntegrationTest test
 ```
 
-实际验证日期：2026-11-24。
+下表记录原交付于 2026-11-24 的验证结果。
 
 | 检查 | 结果 |
 | --- | --- |
-| Java 17 编译及 Maven library 打包 | 通过 |
+| 原交付的 Java 17 编译及 Maven 打包 | 通过 |
 | 后端集成测试：H2 | 14/14 通过 |
 | 后端集成测试：隔离 MySQL 26.7.0，读取已有 schema/seed | 14/14 通过 |
 | 小程序客户端、分页、异步竞态及提交状态逻辑 | 16/16 通过（Node 测试，非微信渲染器） |
@@ -238,7 +211,7 @@ mvn -f backend/search-comment/pom.xml test
 
 ## 联调验收顺序
 
-1. 公共后端导入模块、连接数据库并实现鉴权适配器；无令牌请求返回 401。
+1. 启动统一后端并连接数据库，验证无令牌请求返回 401。
 2. 配置负责人提供 `{id,name}[]` 标签适配；搜索“晚霞”和标签“摄影”得到对应印记；不同标签返回空结果。
 3. 首页负责人注册搜索页并放置入口；点击搜索结果打开已有详情页。
 4. 详情负责人挂载评论组件；发布普通评论，刷新页面后内容仍在，数量同步增加。

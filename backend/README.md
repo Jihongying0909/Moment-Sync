@@ -1,6 +1,17 @@
-# 后端启动与鉴权接入
+# 后端开发与启动
 
-`app/` 是 Spring Boot 启动入口，`search-comment/` 提供搜索和评论接口。两个模块由 `backend/pom.xml` 一起构建。
+后端由一个 Maven 模块构建，入口是 `com.momentsync.MomentSyncApplication`。业务代码放在 `src/main/java/com/momentsync/`，测试放在 `src/test/java/`。
+
+| Java 包 | 代码归属 |
+| --- | --- |
+| `auth` | 登录和 JWT、当前用户身份、活跃账号检查 |
+| `post` | 印记发布、列表、详情和搜索，统一维护公开印记的可见性规则 |
+| `comment` | 评论列表、发布及写入事务 |
+| `moderation` | 内容检查接口和敏感词实现 |
+| `web` | 统一响应、通用异常处理和健康检查 |
+| `admin` | 后续管理端接口 |
+
+新增功能在对应业务包里开发。评论发布由 `comment` 在同一事务中复查账号、通过 `post` 锁定并检查印记，再写入评论。
 
 ## 本地启动
 
@@ -8,7 +19,7 @@
 
 ```bash
 mvn -f backend/pom.xml clean package
-java -jar backend/app/target/moment-sync-app-0.1.0-SNAPSHOT.jar
+java -jar backend/target/moment-sync-backend-0.1.0-SNAPSHOT.jar
 ```
 
 另开一个终端验证：
@@ -24,8 +35,8 @@ curl -i http://localhost:8080/api/posts/search
 
 - 登录接口校验账号、密码和状态后，调用 `JwtTokenService.issue(userId)` 签发两小时有效的令牌。登录接口以及演示账号的 BCrypt 密码初始化由账号模块接入。
 - 前端后续请求带 `Authorization: Bearer <token>`。后端通过 Spring Security 验证 JWT，并根据数据库中的账号状态和角色决定能否访问。普通用户访问 `/api/admin/**` 返回 `403`，管理员登录接口允许匿名请求。
-- 搜索和评论使用同一个 `CurrentUserProvider` 获取当前账号。评论作者取自登录身份，提交评论时传 `content` 即可。
+- 搜索和评论使用 `auth` 包的 `CurrentUserProvider` 获取当前账号。评论作者取自登录身份，提交评论时传 `content` 即可。
 
 ## 测试
 
-从仓库根目录运行 `mvn -f backend/pom.xml test`，默认使用 H2 测试数据库。鉴权集成测试也支持真实 MySQL，使用 `APP_TEST_DB_URL`、`APP_TEST_DB_USER`、`APP_TEST_DB_PASSWORD` 指向单独的 `moment_auth_test_*` 测试库。搜索评论模块的 MySQL 测试用单独的 `interaction_test_*` 测试库，配置见其模块说明。
+从仓库根目录运行 `mvn -f backend/pom.xml clean verify`，统一运行鉴权和搜索评论集成测试，并构建可执行 JAR。测试默认使用 H2。鉴权集成测试也支持真实 MySQL，使用 `APP_TEST_DB_URL`、`APP_TEST_DB_USER`、`APP_TEST_DB_PASSWORD` 指向单独的 `moment_auth_test_*` 测试库。搜索评论的 MySQL 测试用单独的 `interaction_test_*` 测试库，配置见[搜索评论说明](../docs/modules/search-comment-cax.md#验证与复现)。
