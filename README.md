@@ -37,7 +37,7 @@ Moment-Sync/
 1. 复制 `.env.example` 为本地配置文件，填写本机配置，禁止提交真实密码或密钥。
 2. 执行 `database/schema.sql` 创建表。
 3. 执行 `database/seed.sql` 导入演示数据。
-4. 按[后端启动说明](backend/README.md)运行 Spring Boot。小程序和管理后台的启动命令由各模块负责人在对应目录补充。
+4. 按[后端启动说明](backend/README.md)运行 Spring Boot，按[小程序启动与协作说明](miniprogram/README.md)在微信开发者工具导入 `miniprogram/`。管理后台的启动命令由负责人在 `admin-web/` 补充。
 
 ## 分支约定
 
@@ -51,7 +51,9 @@ Moment-Sync/
 ## 文档入口
 
 - [第一周需求范围](docs/requirements.md)
-- [第一周分工与协作方案](docs/第一周Demo分工与协作方案.md)
+- [第一周前后端分组方案](docs/第一周Demo前后端分组方案.md)
+- [Demo 前端分工](docs/tasks/Demo前端分工.md)
+- [Demo 后端分工](docs/tasks/Demo后端分工.md)
 - [接口文档](docs/api.md)
 - [任务看板](docs/tasks.md)
 - [数据库说明](docs/database.md)
