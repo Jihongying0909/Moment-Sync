@@ -1,0 +1,14 @@
+@import "../../style.wxss";
+.comment-panel { padding: 30rpx; }
+.comment-heading { display: flex; align-items: center; gap: 18rpx; margin-bottom: 14rpx; font-size: 34rpx; font-weight: 600; }
+.count { background: #f2df96; border-radius: 16rpx 8rpx; padding: 2rpx 16rpx; font-size: 25rpx; }
+.composer { margin: 28rpx 0 14rpx; }
+.comment-input { width: 100%; box-sizing: border-box; height: 190rpx; padding: 20rpx; border: 2rpx dashed #9ba58b; border-radius: 14rpx; background: #f8f7ef; font-family: inherit; font-size: 28rpx; line-height: 1.7; }
+.compose-footer { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; margin-top: 20rpx; }
+.feedback { padding: 20rpx 0; font-size: 26rpx; }
+.empty-comment { padding: 42rpx 0; text-align: center; font-size: 26rpx; color: #787e6c; }
+.comment { padding: 26rpx 0; border-top: 2rpx dashed #d4d8c8; }
+.author { font-size: 27rpx; color: #536c46; font-weight: 600; }
+.comment-text { margin: 12rpx 0; font-size: 29rpx; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; }
+.comment-time { font-size: 22rpx; color: #858675; }
+.more { display: block; margin: auto; }

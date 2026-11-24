@@ -1,0 +1,11 @@
+/* 原创原生 WXSS 风格实现；未引入 Looseleaf 或第三方字体资源。 */
+.notebook, .comment-panel, .search-entry { color: #302d28; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
+.paper { background: #fffdf6; border: 2rpx solid #4d5146; border-radius: 22rpx 12rpx 20rpx 14rpx; box-shadow: 5rpx 6rpx 0 #d8decf; }
+.button { display: inline-flex; align-items: center; justify-content: center; margin: 0; padding: 0 28rpx; min-height: 84rpx; background: #fffdf6; color: #302d28; border: 2rpx solid #4d5146; border-radius: 16rpx 10rpx 18rpx 12rpx; font-size: 28rpx; line-height: 1.4; }
+.button::after, .chip::after, .post-card::after, .search-entry::after, .link-button::after { border: 0; }
+.primary { background: #dce7cf; font-weight: 600; }
+.button[disabled] { color: #777970; background: #e9e9df; }
+.button:active, .chip:active { transform: translateY(2rpx); }
+.muted { color: #6c6c61; font-size: 25rpx; line-height: 1.6; }
+.error { color: #a03e2c; overflow-wrap: anywhere; }
+.link-button { display: inline-block; margin: 0; padding: 12rpx; background: transparent; color: #506346; font-size: 25rpx; text-decoration: underline; }

@@ -1,0 +1,1 @@
+<button class="search-entry" bindtap="open" aria-label="搜索校园印记"><text class="search-icon">⌕</text><text>搜一搜，重遇校园时光</text><text class="arrow">→</text></button>

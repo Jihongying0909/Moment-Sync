@@ -37,7 +37,7 @@ Moment-Sync/
 1. 复制 `.env.example` 为本地配置文件，填写本机配置，禁止提交真实密码或密钥。
 2. 执行 `database/schema.sql` 创建表。
 3. 执行 `database/seed.sql` 导入演示数据。
-4. 后端、小程序和管理后台的具体启动命令由各模块负责人在对应目录补充。
+4. 按[后端启动说明](backend/README.md)运行 Spring Boot。小程序和管理后台的启动命令由各模块负责人在对应目录补充。
 
 ## 分支约定
 
