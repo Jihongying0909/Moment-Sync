@@ -1,0 +1,33 @@
+<view class="notebook">
+  <view class="eyebrow">拾光同频 / 校园记忆</view>
+  <view class="heading">此刻的<text class="marker">光</text></view>
+  <view class="subtitle">把校园里的小事，写进同一本时光笔记本。</view>
+
+  <view class="toolbar">
+    <button class="button primary" bindtap="onOpenPublish" aria-label="发布新印记">＋ 写下印记</button>
+    <button class="button" bindtap="onOpenSearch" aria-label="搜索印记">搜一搜</button>
+  </view>
+  <!-- 搜索模块合并后，可把“搜一搜”按钮替换为 <search-entry />，并在本页 usingComponents 中注册。 -->
+
+  <view class="result-heading">
+    <text>校园时光</text>
+    <text class="muted">{{loaded ? total + ' 条印记' : '正在翻阅'}}</text>
+  </view>
+
+  <view wx:if="{{error}}" class="paper state error">
+    <text>{{error}}</text>
+    <view class="state-action"><button class="button" bindtap="onRetry">重试</button></view>
+  </view>
+  <view wx:if="{{loading && page === 0 && !error}}" class="paper state">正在翻阅校园时光…</view>
+  <view wx:if="{{loaded && !loading && !error && total === 0}}" class="paper state">
+    <view class="empty-mark">✎</view>
+    <view class="empty-title">这本笔记本还是空的</view>
+    <view class="muted">从今天的一件小事开始，写下第一条印记吧。</view>
+    <view class="state-action"><button class="button primary" bindtap="onOpenPublish">写下第一条</button></view>
+  </view>
+
+  <post-card wx:for="{{items}}" wx:key="id" post="{{item}}" bind:open="onOpenPost" />
+
+  <button wx:if="{{hasMore && !error}}" class="button more" disabled="{{loading}}" loading="{{loading}}" bindtap="onMore">{{loading ? '翻页中…' : '再翻一页'}}</button>
+  <view wx:if="{{loaded && total > 0 && !hasMore && !loading}}" class="end-note">— 这一页时光，已翻到底 —</view>
+</view>

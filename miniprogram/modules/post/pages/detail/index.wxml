@@ -1,0 +1,31 @@
+<view class="notebook">
+  <view wx:if="{{loading}}" class="paper state">正在打开这段时光…</view>
+  <view wx:if="{{error}}" class="paper state error">
+    <text>{{error}}</text>
+    <view class="state-action"><button class="button" bindtap="onRetry">重试</button></view>
+  </view>
+
+  <block wx:if="{{post && !loading && !error}}">
+    <view class="eyebrow">拾光同频 / 印记详情</view>
+    <view class="detail-title">{{post.title}}</view>
+    <view class="detail-meta">{{post.author.nickname}} · {{post.createdAt}}</view>
+
+    <image wx:if="{{post.imageUrl}}" class="detail-image paper" src="{{post.imageUrl}}" mode="widthFix" aria-label="印记图片" />
+
+    <view class="paper detail-paper">
+      <view class="post-content">{{post.content}}</view>
+      <view wx:if="{{post.tags.length}}" class="detail-tags">
+        <text wx:for="{{post.tags}}" wx:key="id" wx:for-item="tag" class="inline-tag"># {{tag.name}}</text>
+      </view>
+      <view class="detail-facts">
+        <view class="fact"><text class="fact-label">心情</text><text>{{post.mood || '未记录'}}</text></view>
+        <view class="fact"><text class="fact-label">地点</text><text>{{post.campusLocation || '未记录'}}</text></view>
+        <view class="fact"><text class="fact-label">留言</text><text>{{commentCount !== null ? commentCount : post.commentCount}} 条</text></view>
+      </view>
+    </view>
+
+    <view class="comments-heading">同频留言</view>
+    <!-- 搜索评论模块合并后，在此处挂载 <comment-panel post-id="{{post.id}}" bind:countchange="onCommentCountChange" />，
+         并在本页 usingComponents 中注册 "/modules/search-comment/components/comment-panel/index"。 -->
+  </block>
+</view>

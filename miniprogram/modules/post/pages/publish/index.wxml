@@ -1,0 +1,37 @@
+<view class="notebook">
+  <view class="eyebrow">拾光同频 / 记录</view>
+  <view class="heading">写下此刻的<text class="marker">光</text></view>
+  <view class="subtitle">标题、正文、一张照片，再加上标签、心情和地点。</view>
+
+  <view class="paper form-paper">
+    <view class="field-label">标题</view>
+    <input class="field-input" value="{{title}}" maxlength="100" placeholder="给这段时光起个名字" aria-label="印记标题，最多100字" bindinput="onTitleInput" />
+    <view class="counter">{{titleLength}} / 100</view>
+
+    <view class="field-label content-label">正文</view>
+    <textarea class="field-textarea" value="{{content}}" maxlength="2000" auto-height placeholder="今天发生了什么值得记住的小事？" aria-label="印记正文，最多2000字" bindinput="onContentInput" />
+    <view class="counter">{{contentLength}} / 2000</view>
+
+    <view class="divider"></view>
+
+    <media-picker path="{{imagePath}}" disabled="{{submitting}}" bind:change="onImageChange" bind:error="onImageError" />
+
+    <view class="divider"></view>
+
+    <option-picker label="标签（最多 5 个）" options="{{tagOptions}}" multiple="{{true}}" disabled="{{submitting}}" empty-text="标签配置暂未接入" bind:change="onTagsChange" />
+    <option-picker label="心情" options="{{moodOptions}}" disabled="{{submitting}}" empty-text="心情配置暂未接入" bind:change="onMoodChange" />
+    <option-picker label="校园地点" options="{{locationOptions}}" disabled="{{submitting}}" empty-text="地点配置暂未接入" bind:change="onLocationChange" />
+
+    <view wx:if="{{configError}}" class="muted config-note">{{configError}}</view>
+  </view>
+
+  <view wx:if="{{status === 'uploading'}}" class="status-line muted">正在上传图片…</view>
+  <view wx:if="{{status === 'submitting'}}" class="status-line muted">正在保存这段时光…</view>
+  <view wx:if="{{status === 'success'}}" class="status-line muted">发布成功，正在返回首页…</view>
+  <view wx:if="{{error}}" class="paper state error">{{error}}</view>
+
+  <button class="button primary submit" loading="{{submitting}}" disabled="{{submitting || uploading}}" bindtap="onSubmit">
+    {{uploading ? '上传图片中…' : (submitting ? '发布中…' : '发布印记')}}
+  </button>
+  <view class="muted submit-note">发布失败时内容会保留，可直接重试。</view>
+</view>

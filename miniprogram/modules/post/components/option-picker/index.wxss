@@ -1,0 +1,4 @@
+@import "../../style.wxss";
+
+.option-picker { margin-bottom: 24rpx; }
+.chips { display: flex; flex-wrap: wrap; }
