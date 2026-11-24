@@ -1,0 +1,22 @@
+@import "../../style.wxss";
+
+.form-paper { padding: 28rpx 24rpx 8rpx; }
+.field-input, .field-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 18rpx 20rpx;
+  background: #ffffff;
+  border: 2rpx solid #b8bdaf;
+  border-radius: 14rpx 8rpx 14rpx 8rpx;
+  color: #302d28;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+.field-textarea { min-height: 200rpx; }
+.content-label { margin-top: 24rpx; }
+.counter { margin: 8rpx 0 4rpx; text-align: right; color: #8b8c80; font-size: 22rpx; }
+.divider { margin: 24rpx 0; border-top: 2rpx dashed #cdd2c5; }
+.config-note { margin-bottom: 20rpx; }
+.status-line { margin: 20rpx 4rpx 0; }
+.submit { width: 100%; margin-top: 24rpx; }
+.submit-note { margin-top: 14rpx; text-align: center; font-size: 22rpx; }

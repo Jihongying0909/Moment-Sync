@@ -1,0 +1,18 @@
+<view class="media-picker">
+  <view class="field-label">封面图片<text class="muted">（单张，不超过 {{maxSizeMb}}MB）</text></view>
+  <view wx:if="{{path}}" class="preview-wrap paper">
+    <image class="preview" src="{{path}}" mode="aspectFill" bindtap="preview" aria-label="预览已选图片" />
+    <view class="preview-actions">
+      <text class="muted">已选择一张图片</text>
+      <view class="action-row">
+        <button class="button" size="mini" disabled="{{disabled}}" bindtap="choose">更换</button>
+        <button class="button danger" size="mini" disabled="{{disabled}}" bindtap="clear">移除</button>
+      </view>
+    </view>
+  </view>
+  <button wx:else class="paper upload-slot" disabled="{{disabled}}" bindtap="choose" aria-label="选择一张图片">
+    <view class="upload-icon">＋</view>
+    <view class="upload-title">添加一张校园照片</view>
+    <view class="muted">轻点这里，从相册选择或拍照</view>
+  </button>
+</view>
