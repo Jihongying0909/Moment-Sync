@@ -1,0 +1,51 @@
+.profile-card {
+  padding: 32rpx 28rpx;
+}
+.profile-head {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  padding-bottom: 24rpx;
+  border-bottom: 2rpx dashed #cdd2c5;
+}
+.avatar {
+  width: 108rpx;
+  height: 108rpx;
+  border-radius: 50%;
+  border: 2rpx solid #4d5146;
+  background: #dce7cf;
+  flex-shrink: 0;
+}
+.avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #26301f;
+}
+.nickname {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #2d3029;
+}
+.profile-error {
+  margin-top: 18rpx;
+}
+.profile-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 28rpx;
+}
+.action-btn {
+  flex: 1;
+}
+.guest-title {
+  margin-bottom: 10rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+.login-btn {
+  width: 100%;
+  margin-top: 24rpx;
+}

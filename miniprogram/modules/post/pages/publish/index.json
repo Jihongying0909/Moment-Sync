@@ -1,1 +1,1 @@
-{"navigationBarTitleText":"写下印记","backgroundColor":"#f7f3e8","usingComponents":{"media-picker":"/modules/post/components/media-picker/index","option-picker":"/modules/post/components/option-picker/index"}}
+{"navigationBarTitleText":"写下印记","backgroundColor":"#f7f3e8","usingComponents":{"media-picker":"/modules/post/components/media-picker/index","tag-picker":"/components/tag-picker/index","mood-picker":"/components/mood-picker/index","location-picker":"/components/location-picker/index"}}

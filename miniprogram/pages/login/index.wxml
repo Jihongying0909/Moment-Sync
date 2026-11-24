@@ -1,0 +1,42 @@
+<view class="notebook">
+  <view class="eyebrow">拾光同频 / 身份验证</view>
+  <view class="heading">翻开你的<text class="marker">时光本</text></view>
+  <view class="subtitle">使用校园演示账号登录，记录与重遇此刻的日常。</view>
+
+  <view class="paper login-card">
+    <view class="field-group">
+      <view class="field-label">账号</view>
+      <input
+        class="field-input"
+        value="{{username}}"
+        maxlength="50"
+        placeholder="请输入用户名"
+        aria-label="登录用户名"
+        bindinput="onUsernameInput"
+      />
+    </view>
+
+    <view class="field-group">
+      <view class="field-label">密码</view>
+      <input
+        class="field-input"
+        password="{{true}}"
+        value="{{password}}"
+        maxlength="100"
+        placeholder="请输入登录密码"
+        aria-label="登录密码"
+        bindinput="onPasswordInput"
+        bindconfirm="onSubmit"
+      />
+    </view>
+
+    <view wx:if="{{error}}" class="error login-error">{{error}}</view>
+
+    <button
+      class="button primary login-submit"
+      loading="{{submitting}}"
+      disabled="{{submitting}}"
+      bindtap="onSubmit"
+    >{{submitting ? '正在核验身份…' : '登录进入拾光'}}</button>
+  </view>
+</view>

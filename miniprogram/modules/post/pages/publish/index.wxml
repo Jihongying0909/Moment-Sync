@@ -18,9 +18,9 @@
 
     <view class="divider"></view>
 
-    <option-picker label="标签（最多 5 个）" options="{{tagOptions}}" multiple="{{true}}" disabled="{{submitting}}" empty-text="标签配置暂未接入" bind:change="onTagsChange" />
-    <option-picker label="心情" options="{{moodOptions}}" disabled="{{submitting}}" empty-text="心情配置暂未接入" bind:change="onMoodChange" />
-    <option-picker label="校园地点" options="{{locationOptions}}" disabled="{{submitting}}" empty-text="地点配置暂未接入" bind:change="onLocationChange" />
+    <tag-picker label="标签" options="{{tagOptions}}" max="{{5}}" disabled="{{submitting}}" empty-text="标签配置暂未接入" bind:change="onTagsChange" />
+    <mood-picker label="心情" options="{{moodOptions}}" disabled="{{submitting}}" empty-text="心情配置暂未接入" bind:change="onMoodChange" />
+    <location-picker label="校园地点" options="{{locationOptions}}" disabled="{{submitting}}" empty-text="地点配置暂未接入" bind:change="onLocationChange" />
 
     <view wx:if="{{configError}}" class="muted config-note">{{configError}}</view>
   </view>

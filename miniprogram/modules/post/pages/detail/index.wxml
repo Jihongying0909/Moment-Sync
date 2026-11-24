@@ -25,7 +25,6 @@
     </view>
 
     <view class="comments-heading">同频留言</view>
-    <!-- 搜索评论模块合并后，在此处挂载 <comment-panel post-id="{{post.id}}" bind:countchange="onCommentCountChange" />，
-         并在本页 usingComponents 中注册 "/modules/search-comment/components/comment-panel/index"。 -->
+    <comment-panel id="comments" post-id="{{post.id}}" bind:countchange="onCommentCountChange" />
   </block>
 </view>

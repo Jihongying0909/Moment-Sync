@@ -3,11 +3,13 @@
   <view class="heading">此刻的<text class="marker">光</text></view>
   <view class="subtitle">把校园里的小事，写进同一本时光笔记本。</view>
 
+  <view class="search-slot">
+    <search-entry url="/modules/search-comment/pages/search/index" />
+  </view>
+
   <view class="toolbar">
     <button class="button primary" bindtap="onOpenPublish" aria-label="发布新印记">＋ 写下印记</button>
-    <button class="button" bindtap="onOpenSearch" aria-label="搜索印记">搜一搜</button>
   </view>
-  <!-- 搜索模块合并后，可把“搜一搜”按钮替换为 <search-entry />，并在本页 usingComponents 中注册。 -->
 
   <view class="result-heading">
     <text>校园时光</text>

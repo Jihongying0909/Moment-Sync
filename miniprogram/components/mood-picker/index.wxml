@@ -1,0 +1,18 @@
+<view class="picker">
+  <view class="picker-header">
+    <text class="picker-label">{{label}}</text>
+    <text wx:if="{{current}}" class="picker-meta">当前：{{current}}（再点取消）</text>
+  </view>
+  <view wx:if="{{items.length}}" class="picker-chips">
+    <button
+      wx:for="{{items}}"
+      wx:key="value"
+      class="picker-chip {{item.selected ? 'mood-selected' : ''}}"
+      data-value="{{item.value}}"
+      disabled="{{disabled}}"
+      bindtap="onSelect"
+      aria-label="选择心情：{{item.label}}"
+    >{{item.label}}</button>
+  </view>
+  <view wx:else class="picker-empty">{{emptyText}}</view>
+</view>

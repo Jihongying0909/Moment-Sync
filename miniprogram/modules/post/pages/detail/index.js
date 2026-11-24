@@ -42,8 +42,9 @@ Page({
   },
 
   onPullDownRefresh: function () {
-    var self = this;
-    return this.load().then(function () { wx.stopPullDownRefresh(); });
+    var comments = typeof this.selectComponent === 'function' ? this.selectComponent('#comments') : null;
+    var refreshComments = comments && typeof comments.refresh === 'function' ? comments.refresh() : Promise.resolve();
+    return Promise.all([this.load(), refreshComments]).then(function () { wx.stopPullDownRefresh(); });
   },
 
   // 搜索评论模块合并后，comment-panel 的 countchange 事件会调用这里，以真实数量覆盖详情值。

@@ -1,5 +1,6 @@
 @import "../../style.wxss";
 
+.search-slot { margin-bottom: 18rpx; }
 .toolbar { display: flex; gap: 16rpx; margin-bottom: 32rpx; }
 .toolbar .button { flex: 1; padding: 0 12rpx; }
 .result-heading {
