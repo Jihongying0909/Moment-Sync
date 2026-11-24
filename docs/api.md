@@ -2,10 +2,9 @@
 
 ## 统一约定
 
-- 基础路径：`/api`
-- 数据格式：`application/json`
-- 鉴权头：`Authorization: Bearer <token>`
-- 时间格式：`yyyy-MM-dd HH:mm:ss`
+- 所有接口位于 `/api` 下，响应格式为 `application/json`。请求体格式以各接口的约定为准。
+- 需要登录的接口使用 `Authorization: Bearer <token>`。
+- 时间格式为 `yyyy-MM-dd HH:mm:ss`。
 - 鉴权失败返回 HTTP `401`，统一错误码 `40101`。角色权限不足返回 HTTP `403`，统一错误码 `40301`。
 
 ### 统一响应示例
@@ -20,33 +19,48 @@
 
 ## 接口清单
 
-| 模块 | 方法 | 路径 | 权限 | 负责人 | 状态 |
+开发位置和联调职责见 [Demo 后端分工](tasks/Demo后端分工.md)。
+
+| 功能 | 方法 | 路径 | 权限 | 负责人 | 状态 |
 | --- | --- | --- | --- | --- | --- |
-| 基础 | GET | `/api/health` | 公开 | 吴家裔 | 可联调 |
-| 用户 | POST | `/api/auth/login` | 公开 | 廖子豪 | 待设计 |
-| 用户 | GET | `/api/users/me` | 用户 | 廖子豪 | 待设计 |
-| 配置 | GET | `/api/tags` | 用户 | 段晨鸣 | 待设计 |
-| 配置 | GET | `/api/moods` | 用户 | 段晨鸣 | 待设计 |
-| 配置 | GET | `/api/locations` | 用户 | 段晨鸣 | 待设计 |
-| 印记 | POST | `/api/posts` | 用户 | 江可妮 | 待设计 |
-| 印记 | GET | `/api/posts` | 用户 | 江可妮 | 待设计 |
-| 印记 | GET | `/api/posts/{id}` | 用户 | 江可妮 | 待设计 |
-| 媒体 | POST | `/api/files/images` | 用户 | 江可妮 | 待设计 |
-| 搜索 | GET | `/api/posts/search` | 用户 | 陈昂雄 | 可联调（独立模块） |
-| 评论 | POST | `/api/posts/{id}/comments` | 用户 | 陈昂雄 | 可联调（独立模块） |
-| 评论 | GET | `/api/posts/{id}/comments` | 用户 | 陈昂雄 | 可联调（独立模块） |
-| 后台 | POST | `/api/admin/auth/login` | 公开 | 周黎 | 待设计 |
-| 后台 | GET | `/api/admin/users` | 管理员 | 周黎 | 待设计 |
-| 后台 | GET | `/api/admin/posts` | 管理员 | 周黎 | 待设计 |
-| 后台 | PATCH | `/api/admin/posts/{id}/status` | 管理员 | 周黎 | 待设计 |
-| 后台 | GET | `/api/admin/statistics` | 管理员 | 周黎 | 待设计 |
+| 健康检查 | GET | `/api/health` | 公开 | 吴家裔 | 可联调 |
+| 普通用户登录 | POST | `/api/auth/login` | 公开 | 吴家裔 | 待开发 |
+| 当前用户信息 | GET | `/api/users/me` | 需登录 | 吴家裔 | 待开发 |
+| 管理员登录 | POST | `/api/admin/auth/login` | 公开，登录时校验管理员角色 | 吴家裔 | 待开发 |
+| 标签配置 | GET | `/api/tags` | 需登录 | 陈昂雄 | 待开发 |
+| 心情配置 | GET | `/api/moods` | 需登录 | 陈昂雄 | 待开发 |
+| 地点配置 | GET | `/api/locations` | 需登录 | 陈昂雄 | 待开发 |
+| 单张图片上传 | POST | `/api/files/images` | 需登录 | 陈昂雄 | 待开发 |
+| 发布印记 | POST | `/api/posts` | 需登录 | 廖子豪 | 待开发 |
+| 首页印记列表 | GET | `/api/posts` | 需登录 | 廖子豪 | 待开发 |
+| 印记详情 | GET | `/api/posts/{id}` | 需登录 | 廖子豪 | 待开发 |
+| 搜索印记 | GET | `/api/posts/search` | 需登录 | 陈昂雄 | 可联调 |
+| 发表评论 | POST | `/api/posts/{id}/comments` | 需登录 | 陈昂雄 | 可联调 |
+| 评论列表 | GET | `/api/posts/{id}/comments` | 需登录 | 陈昂雄 | 可联调 |
+| 后台用户查询 | GET | `/api/admin/users` | 管理员 | 周黎 | 待开发 |
+| 后台内容列表 | GET | `/api/admin/posts` | 管理员 | 周黎 | 待开发 |
+| 后台内容详情 | 待确认 | 待确认 | 管理员 | 周黎 | 待设计 |
+| 内容下架 | PATCH | `/api/admin/posts/{id}/status` | 管理员 | 周黎 | 待开发 |
+| 后台基础统计 | GET | `/api/admin/statistics` | 管理员 | 周黎 | 待开发 |
+
+## 已实现接口
+
+- 健康检查连库成功时返回 HTTP `200` 和 `data.database: UP`，连库失败时返回 HTTP `503` 和错误码 `50301`。
+- 搜索、评论列表和发表评论已接入后端，集成测试覆盖真实 JWT，待团队环境和小程序联调。请求参数、返回字段和错误码见 [搜索评论接口契约](modules/search-comment-cax.md#api-契约)。
+
+## 待开发接口的联调约定
+
+- 普通用户登录和管理员登录共用 BCrypt 密码校验及 JWT 签发逻辑。管理员登录还需检查账号角色。
+- 陈昂雄和廖子豪确认标签、心情和地点的取值，以及图片上传的返回字段与发布请求如何引用图片。发布时检查标题和正文的敏感词。
+- 普通用户在首页、详情和搜索只能看到公开且已发布的印记。下架后，这些入口不再展示该印记，普通用户也无法读取或发布其评论。
+- 周黎和管理后台同学确认内容详情的方法、路径和返回字段，并确定用户数、印记数和评论数的统计口径，包括是否计入禁用账号、已下架印记和已删除评论。
 
 ## 单个接口记录模板
 
 ### 接口名称
 
 - 负责人：
-- 状态：待设计 / 开发中 / 可联调 / 已验收
+- 状态：待设计 / 待开发 / 开发中 / 可联调 / 已验收
 - 方法与路径：
 - 权限：
 - 请求参数：
@@ -54,8 +68,3 @@
 - 成功响应：
 - 错误码：
 - 备注：
-
-
-## 陈昂雄：搜索、评论与基础内容安全
-
-上述三个接口的请求参数、分页结构、成功响应、错误码、鉴权和集成要求见 [模块接口与接入说明](modules/search-comment-cax.md#api-契约)。实现遵循现有表结构和统一响应，模块测试已通过，真实 JWT 与小程序宿主待联调。
