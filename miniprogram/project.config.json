@@ -1,0 +1,34 @@
+{
+  "description": "拾光同频 Moment Sync 微信小程序工程配置",
+  "packOptions": {
+    "ignore": [
+      { "type": "glob", "value": "**/tests/**" },
+      { "type": "glob", "value": "**/*.test.cjs" },
+      { "type": "glob", "value": "**/*.md" }
+    ]
+  },
+  "setting": {
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "urlCheck": false,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true
+  },
+  "compileType": "miniprogram",
+  "appid": "touristappid",
+  "projectname": "moment-sync-miniprogram",
+  "simulatorPluginLibVersion": {}
+}

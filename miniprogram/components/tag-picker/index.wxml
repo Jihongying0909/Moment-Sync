@@ -1,0 +1,22 @@
+<view class="picker">
+  <view class="picker-header">
+    <text class="picker-label">{{label}}</text>
+    <view wx:if="{{items.length}}" class="picker-tools">
+      <text class="picker-meta">已选 {{selectedCount}} / {{max}}</text>
+      <button wx:if="{{selectedCount > 0 && !disabled}}" class="picker-clear" bindtap="onClear" aria-label="清空已选标签">清空</button>
+    </view>
+  </view>
+  <view wx:if="{{items.length}}" class="picker-chips">
+    <button
+      wx:for="{{items}}"
+      wx:key="value"
+      class="picker-chip {{item.selected ? 'selected' : ''}}"
+      data-value="{{item.value}}"
+      disabled="{{disabled}}"
+      bindtap="onToggle"
+      aria-label="选择标签：{{item.label}}"
+    ><text class="chip-prefix">#</text><text>{{item.label}}</text></button>
+  </view>
+  <view wx:else class="picker-empty">{{emptyText}}</view>
+  <view wx:if="{{limitHint}}" class="picker-hint">{{limitHint}}</view>
+</view>

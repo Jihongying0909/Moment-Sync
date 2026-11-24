@@ -1,0 +1,24 @@
+@import "../../style.wxss";
+
+.upload-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 260rpx;
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+.upload-icon { color: #506346; font-size: 64rpx; line-height: 1; }
+.upload-title { margin: 16rpx 0 6rpx; font-size: 28rpx; font-weight: 600; }
+.preview-wrap { overflow: hidden; }
+.preview { display: block; width: 100%; height: 320rpx; background: #e9e9df; }
+.preview-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18rpx 24rpx;
+  gap: 16rpx;
+}
+.action-row { display: flex; gap: 12rpx; }

@@ -1,0 +1,16 @@
+@import "../../style.wxss";
+
+.search-slot { margin-bottom: 18rpx; }
+.toolbar { display: flex; gap: 16rpx; margin-bottom: 32rpx; }
+.toolbar .button { flex: 1; padding: 0 12rpx; }
+.result-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 4rpx 20rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+.state-action { margin-top: 20rpx; }
+.empty-mark { margin-bottom: 8rpx; font-size: 56rpx; color: #506346; }
+.empty-title { margin-bottom: 10rpx; font-size: 32rpx; font-weight: 600; }

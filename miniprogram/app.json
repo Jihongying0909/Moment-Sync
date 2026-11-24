@@ -1,0 +1,34 @@
+{
+  "pages": [
+    "modules/post/pages/home/index",
+    "modules/post/pages/publish/index",
+    "modules/post/pages/detail/index",
+    "modules/search-comment/pages/search/index",
+    "pages/login/index",
+    "pages/profile/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#f7f3e8",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "拾光同频",
+    "backgroundColor": "#f7f3e8",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#6c6c61",
+    "selectedColor": "#26301f",
+    "backgroundColor": "#fffdf6",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "modules/post/pages/home/index",
+        "text": "时光"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json"
+}
