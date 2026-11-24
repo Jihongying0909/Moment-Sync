@@ -1,6 +1,24 @@
 # 后端开发与启动
 
-后端由一个 Maven 模块构建，入口是 `com.momentsync.MomentSyncApplication`。业务代码放在 `src/main/java/com/momentsync/`，测试放在 `src/test/java/`。
+`pom.xml` 是 Maven 构建入口，`MomentSyncApplication.java` 是 Spring Boot 启动入口。
+
+```text
+backend/
+├── pom.xml
+└── src/
+    ├── main/
+    │   ├── java/com/momentsync/
+    │   │   ├── MomentSyncApplication.java
+    │   │   ├── auth/
+    │   │   ├── post/
+    │   │   ├── comment/
+    │   │   ├── moderation/
+    │   │   └── web/
+    │   └── resources/             # 应用配置和敏感词表
+    └── test/java/com/momentsync/  # 集成测试
+```
+
+新的 Java 业务包统一建在 `backend/src/main/java/com/momentsync/` 下。
 
 | Java 包 | 代码归属 |
 | --- | --- |
@@ -11,7 +29,9 @@
 | `web` | 统一响应、通用异常处理和健康检查 |
 | `admin` | 后续管理端接口 |
 
-新增功能在对应业务包里开发。评论发布由 `comment` 在同一事务中复查账号、通过 `post` 锁定并检查印记，再写入评论。
+例如，新增印记详情在 `post/` 开发。开始写管理接口时，在这里新建 `admin/`，Java 文件声明 `package com.momentsync.admin;`。
+
+包按业务划分。同一业务里，`Controller` 接收 HTTP 请求，`Service` 执行业务规则、管理事务，`Repository` 读写数据库。
 
 ## 本地启动
 
