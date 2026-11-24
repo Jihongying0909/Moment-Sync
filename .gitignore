@@ -8,7 +8,7 @@ application-local.properties
 *.key
 
 # Java and Maven
-backend/target/
+backend/**/target/
 *.class
 *.jar
 *.war

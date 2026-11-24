@@ -6,6 +6,7 @@
 - 数据格式：`application/json`
 - 鉴权头：`Authorization: Bearer <token>`
 - 时间格式：`yyyy-MM-dd HH:mm:ss`
+- 鉴权失败返回 HTTP `401`，统一错误码 `40101`。角色权限不足返回 HTTP `403`，统一错误码 `40301`。
 
 ### 统一响应示例
 
@@ -21,6 +22,7 @@
 
 | 模块 | 方法 | 路径 | 权限 | 负责人 | 状态 |
 | --- | --- | --- | --- | --- | --- |
+| 基础 | GET | `/api/health` | 公开 | 吴家裔 | 可联调 |
 | 用户 | POST | `/api/auth/login` | 公开 | 廖子豪 | 待设计 |
 | 用户 | GET | `/api/users/me` | 用户 | 廖子豪 | 待设计 |
 | 配置 | GET | `/api/tags` | 用户 | 段晨鸣 | 待设计 |
