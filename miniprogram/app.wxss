@@ -6,6 +6,10 @@ page {
   line-height: 1.5;
 }
 
+button {
+  box-sizing: border-box;
+}
+
 .notebook {
   min-height: 100vh;
   padding: 32rpx 28rpx 64rpx;
