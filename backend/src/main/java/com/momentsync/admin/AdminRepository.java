@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.momentsync.web.AuthorResponse;
 import com.momentsync.web.PageRequest;
 import com.momentsync.web.PageResult;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -15,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 class AdminRepository {
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final String POST_SCOPE = "p.visibility IN ('PUBLIC', 'PRIVATE')"
+            + " AND p.status IN ('PUBLISHED', 'OFFLINE')";
 
     private final JdbcClient jdbc;
 
@@ -45,9 +48,39 @@ class AdminRepository {
         return new PageResult<>(items, total, page.page(), page.pageSize());
     }
 
+    @Transactional(readOnly = true)
+    PageResult<PostRow> posts(String visibility, String status, PageRequest page) {
+        Map<String, Object> filters = new HashMap<>();
+        String where = " WHERE " + POST_SCOPE;
+        if (visibility != null) {
+            filters.put("visibility", visibility);
+            where += " AND p.visibility = :visibility";
+        }
+        if (status != null) {
+            filters.put("status", status);
+            where += " AND p.status = :status";
+        }
+        long total = jdbc.sql("SELECT COUNT(*) FROM post p" + where).params(filters).query(Long.class).single();
+        var items = jdbc.sql("""
+                        SELECT p.id, p.title, p.user_id, p.visibility, p.status, p.created_at, u.nickname, u.avatar_url
+                        FROM post p JOIN `user` u ON u.id = p.user_id
+                        """ + where + " ORDER BY p.created_at DESC, p.id DESC LIMIT :limit OFFSET :offset")
+                .params(filters).param("limit", page.pageSize()).param("offset", page.offset())
+                .query((rs, row) -> new PostRow(rs.getString("id"), rs.getString("title"), author(rs),
+                        rs.getString("visibility"), rs.getString("status"), createdAt(rs)))
+                .list();
+        return new PageResult<>(items, total, page.page(), page.pageSize());
+    }
+
+    private static AuthorResponse author(ResultSet rs) throws SQLException {
+        return new AuthorResponse(rs.getString("user_id"), rs.getString("nickname"), rs.getString("avatar_url"));
+    }
+
     private static String createdAt(ResultSet rs) throws SQLException {
         return rs.getTimestamp("created_at").toLocalDateTime().format(TIME);
     }
 
     record UserRow(String id, String username, String nickname, String status, String createdAt) {}
+
+    record PostRow(String id, String title, AuthorResponse author, String visibility, String status, String createdAt) {}
 }

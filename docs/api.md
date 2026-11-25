@@ -64,7 +64,7 @@
 | 发表评论 | POST | `/api/posts/{id}/comments` | 需登录 | 可联调 |
 | 评论列表 | GET | `/api/posts/{id}/comments` | 需登录 | 可联调 |
 | 后台用户查询 | GET | `/api/admin/users` | 管理员 | 可联调 |
-| 后台内容列表 | GET | `/api/admin/posts` | 管理员 | 待开发 |
+| 后台内容列表 | GET | `/api/admin/posts` | 管理员 | 可联调 |
 | 后台内容详情 | GET | `/api/admin/posts/{id}` | 管理员 | 待开发 |
 | 内容下架 | PATCH | `/api/admin/posts/{id}/status` | 管理员 | 待开发 |
 | 后台基础统计 | GET | `/api/admin/statistics` | 管理员 | 待开发 |

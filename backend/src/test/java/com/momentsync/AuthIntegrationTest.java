@@ -85,8 +85,14 @@ class AuthIntegrationTest {
     }
 
     @Test
-    void adminQueriesOnlyOrdinaryUsersAndFiltersByNicknameAndStatus() throws Exception {
+    void adminQueriesOnlyAccountsAndPostsInTheReviewScope() throws Exception {
         jdbc.update("UPDATE `user` SET status = 'DISABLED' WHERE id = 2");
+        jdbc.update("UPDATE post SET visibility = 'PRIVATE' WHERE id = 2");
+        jdbc.update("UPDATE post SET status = 'OFFLINE' WHERE id = 3");
+        jdbc.update("""
+                INSERT INTO post (id, user_id, title, content, visibility, status)
+                VALUES (4, 3, '已删除印记', '已删除正文', 'PRIVATE', 'DELETED')
+                """);
         String admin = "Bearer " + tokens.issue(1);
 
         mvc.perform(get("/api/admin/users").header(HttpHeaders.AUTHORIZATION, admin))
@@ -100,6 +106,21 @@ class AuthIntegrationTest {
                 .andExpect(jsonPath("$.data.items[0].id").value("2"))
                 .andExpect(jsonPath("$.data.items[0].status").value("DISABLED"))
                 .andExpect(jsonPath("$.data.items[0].length()").value(5));
+
+        mvc.perform(get("/api/admin/posts").header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(3));
+
+        mvc.perform(get("/api/admin/posts").header(HttpHeaders.AUTHORIZATION, admin)
+                        .param("visibility", "PRIVATE").param("status", "PUBLISHED").param("pageSize", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(1))
+                .andExpect(jsonPath("$.data.items[0].id").value("2"))
+                .andExpect(jsonPath("$.data.items[0].visibility").value("PRIVATE"));
+
+        mvc.perform(get("/api/admin/posts").header(HttpHeaders.AUTHORIZATION, admin).param("status", "OFFLINE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[0].id").value("3"));
     }
 
     @Test

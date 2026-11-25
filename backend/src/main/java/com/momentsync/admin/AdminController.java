@@ -31,4 +31,17 @@ class AdminController {
         }
         return ApiResponse.success(admin.users(query, status, new PageRequest(page, pageSize)));
     }
+
+    @GetMapping("/posts")
+    ApiResponse<PageResult<AdminRepository.PostRow>> posts(@RequestParam(required = false) String visibility,
+            @RequestParam(required = false) String status, @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+        if (visibility != null && !visibility.equals("PUBLIC") && !visibility.equals("PRIVATE")) {
+            throw ApiException.invalid("可见性须为 PUBLIC 或 PRIVATE");
+        }
+        if (status != null && !status.equals("PUBLISHED") && !status.equals("OFFLINE")) {
+            throw ApiException.invalid("印记状态须为 PUBLISHED 或 OFFLINE");
+        }
+        return ApiResponse.success(admin.posts(visibility, status, new PageRequest(page, pageSize)));
+    }
 }
