@@ -11,7 +11,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.momentsync.auth.JwtTokenService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -25,6 +27,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -33,6 +36,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
@@ -51,6 +55,8 @@ class AuthIntegrationTest {
     @Autowired private JdbcTemplate jdbc;
     @Autowired private JwtTokenService tokens;
     @Autowired private JwtEncoder encoder;
+    @Autowired private ObjectMapper json;
+    @Autowired private BCryptPasswordEncoder passwords;
 
     @DynamicPropertySource
     static void database(DynamicPropertyRegistry registry) {
@@ -160,6 +166,115 @@ class AuthIntegrationTest {
                         .header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "authorization"))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:5173"));
+    }
+
+    @Test
+    void passwordLoginReturnsTokenAndProfileForTheMiniProgram() throws Exception {
+        setPassword("student_a", " a-demo-password ");
+        String reply = login("/api/auth/login", " student_a ", " a-demo-password ")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.user.id").value("2"))
+                .andExpect(jsonPath("$.data.user.username").value("student_a"))
+                .andExpect(jsonPath("$.data.user.nickname").value("小光"))
+                .andExpect(jsonPath("$.data.user.role").value("USER"))
+                .andExpect(jsonPath("$.data.user.passwordHash").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+
+        String token = json.readTree(reply).path("data").path("token").asText();
+        mvc.perform(get("/api/users/me").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value("2"))
+                .andExpect(jsonPath("$.data.role").value("USER"));
+
+        mvc.perform(post("/api/posts/1/comments").header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"content":"账号密码登录后的评论"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.author.id").value("2"));
+    }
+
+    @Test
+    void adminLoginRequiresAnAdminAfterCheckingThePassword() throws Exception {
+        setPassword("student_a", "student-password");
+        setPassword("admin_demo", "admin-password");
+        login("/api/admin/auth/login", "student_a", "incorrect")
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value(40101));
+        login("/api/admin/auth/login", "student_a", "student-password")
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value(40301));
+
+        String reply = login("/api/admin/auth/login", "admin_demo", "admin-password")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.user.role").value("ADMIN"))
+                .andReturn().getResponse().getContentAsString();
+        String token = json.readTree(reply).path("data").path("token").asText();
+        mvc.perform(get("/api/admin/test-only").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void wrongPasswordUnknownAndDisabledAccountsReturnTheSameError() throws Exception {
+        setPassword("student_a", "student-password");
+        String badPassword = login("/api/auth/login", "student_a", "incorrect")
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value(40101))
+                .andReturn().getResponse().getContentAsString();
+        String unknownUser = login("/api/auth/login", "missing-user", "student-password")
+                .andExpect(status().isUnauthorized())
+                .andReturn().getResponse().getContentAsString();
+        jdbc.update("UPDATE `user` SET status = 'DISABLED' WHERE username = 'student_a'");
+        String disabledUser = login("/api/auth/login", "student_a", "student-password")
+                .andExpect(status().isUnauthorized())
+                .andReturn().getResponse().getContentAsString();
+        assertThat(unknownUser).isEqualTo(badPassword);
+        assertThat(disabledUser).isEqualTo(badPassword);
+    }
+
+    @Test
+    void invalidLoginPayloadsUseTheShared400Response() throws Exception {
+        for (String body : new String[]{"{", "{}", "{\"username\":\"student_a\",\"password\":\" \"}"}) {
+            mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content(body))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value(40001));
+        }
+        login("/api/auth/login", "student_a", "长".repeat(25))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(40001));
+    }
+
+    @Test
+    void loginAcceptsCorrectCredentialsWhenTheClientStillHasAnInvalidToken() throws Exception {
+        setPassword("student_a", "student-password");
+        mvc.perform(post("/api/auth/login").header(HttpHeaders.AUTHORIZATION, "Bearer stale-token")
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"username":"student_a","password":"student-password"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.user.id").value("2"));
+    }
+
+    @Test
+    void currentUserRequiresAValidSession() throws Exception {
+        mvc.perform(get("/api/users/me"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value(40101));
+        String token = tokens.issue(2);
+        jdbc.update("UPDATE `user` SET status = 'DISABLED' WHERE username = 'student_a'");
+        mvc.perform(get("/api/users/me").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value(40101));
+    }
+
+    private ResultActions login(String path, String username, String password) throws Exception {
+        String body = json.writeValueAsString(Map.of("username", username, "password", password));
+        return mvc.perform(post(path).contentType(MediaType.APPLICATION_JSON).content(body));
+    }
+
+    private void setPassword(String username, String password) {
+        jdbc.update("UPDATE `user` SET password_hash = ? WHERE username = ?", passwords.encode(password), username);
     }
 
     @TestConfiguration(proxyBeanMethods = false)

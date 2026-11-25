@@ -51,11 +51,24 @@ curl -i http://localhost:8080/api/posts/search
 
 第一条在连库成功时应返回 `200` 及 `data.database: UP`。第二条未带登录凭证，应返回 `401` 及业务错误码 `40101`。管理后台的本地开发端口默认为 `5173`，其他来源可通过逗号分隔的 `CORS_ALLOWED_ORIGINS` 配置。
 
-## 登录模块怎么接
+## 初始化本地演示账号
 
-- 登录接口校验账号、密码和状态后，调用 `JwtTokenService.issue(userId)` 签发两小时有效的令牌。登录接口以及演示账号的 BCrypt 密码初始化由账号模块接入。
-- 前端后续请求带 `Authorization: Bearer <token>`。后端通过 Spring Security 验证 JWT，并根据数据库中的账号状态和角色决定能否访问。普通用户访问 `/api/admin/**` 返回 `403`，管理员登录接口允许匿名请求。
-- 搜索和评论使用 `auth` 包的 `CurrentUserProvider` 获取当前账号。评论作者取自登录身份，提交评论时传 `content` 即可。
+导入 `schema.sql` 和 `seed.sql` 后，首次演示时用 `demo-accounts` profile 启动。按提示给 `student_a`、`student_b` 和 `admin_demo` 分别输入本地密码。每个密码至少 8、最多 72 个 UTF-8 字节。
+
+```bash
+printf 'student_a 密码: '; IFS= read -r -s DEMO_STUDENT_A_PASSWORD; printf '\n'
+printf 'student_b 密码: '; IFS= read -r -s DEMO_STUDENT_B_PASSWORD; printf '\n'
+printf 'admin_demo 密码: '; IFS= read -r -s DEMO_ADMIN_PASSWORD; printf '\n'
+export DEMO_STUDENT_A_PASSWORD DEMO_STUDENT_B_PASSWORD DEMO_ADMIN_PASSWORD
+java -jar backend/target/moment-sync-backend-0.1.0-SNAPSHOT.jar --spring.profiles.active=demo-accounts
+unset DEMO_STUDENT_A_PASSWORD DEMO_STUDENT_B_PASSWORD DEMO_ADMIN_PASSWORD
+```
+
+初始化只为 `seed.sql` 中仍保留占位密码的三个账号写入 BCrypt 哈希，重复启动保留现有密码。初始化后，后续运行使用普通启动命令。密码通过本地环境传入，请勿提交。
+
+## 登录接口
+
+小程序调用 `POST /api/auth/login`，管理后台调用 `POST /api/admin/auth/login`。两者收到 `data.token` 和 `data.user`。前端在后续请求中携带 `Authorization: Bearer <token>`，可通过 `GET /api/users/me` 获取当前账号，并使用同一个令牌调用已实现的搜索、评论接口。请求格式和错误码见 [账号接口契约](../docs/api.md#账号与登录接口)。
 
 ## 测试
 
