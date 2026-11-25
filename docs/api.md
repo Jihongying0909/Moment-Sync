@@ -66,7 +66,7 @@
 | 后台用户查询 | GET | `/api/admin/users` | 管理员 | 可联调 |
 | 后台内容列表 | GET | `/api/admin/posts` | 管理员 | 可联调 |
 | 后台内容详情 | GET | `/api/admin/posts/{id}` | 管理员 | 可联调 |
-| 内容下架 | PATCH | `/api/admin/posts/{id}/status` | 管理员 | 待开发 |
+| 内容下架 | PATCH | `/api/admin/posts/{id}/status` | 管理员 | 可联调 |
 | 后台基础统计 | GET | `/api/admin/statistics` | 管理员 | 待开发 |
 
 ## 账号与登录接口
@@ -325,7 +325,7 @@ Content-Type: application/json
 }
 ```
 
-印记 ID、JSON 请求体或状态值无效时返回 HTTP `400` / `40001`。印记不存在或已删除时返回 HTTP `404` / `40401`。
+印记 ID、JSON 请求体或状态值无效时返回 HTTP `400` / `40001`。印记不存在或已删除时返回 HTTP `404` / `40401`。请求内容类型不受支持时返回 HTTP `415` / `41501`。
 
 ```json
 {

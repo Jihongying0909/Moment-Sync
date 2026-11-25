@@ -14,6 +14,7 @@ import com.momentsync.web.PageRequest;
 import com.momentsync.web.PageResult;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
@@ -104,6 +105,16 @@ class AdminRepository {
                     } while (rs.next());
                     return detail;
                 });
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    String lockPostStatus(long id) {
+        return jdbc.sql("SELECT p.status FROM post p WHERE p.id = :id AND " + POST_SCOPE + " FOR UPDATE")
+                .param("id", id).query(String.class).optional().orElseThrow(AdminRepository::postNotFound);
+    }
+
+    void markOffline(long id) {
+        jdbc.sql("UPDATE post SET status = 'OFFLINE' WHERE id = :id").param("id", id).update();
     }
 
     private static ApiException postNotFound() {
