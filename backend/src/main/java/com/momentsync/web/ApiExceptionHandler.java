@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-@RestControllerAdvice(basePackages = {"com.momentsync.auth", "com.momentsync.post", "com.momentsync.comment"})
+@RestControllerAdvice(basePackages = {"com.momentsync.auth", "com.momentsync.post", "com.momentsync.comment",
+        "com.momentsync.admin"})
 class ApiExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(ApiExceptionHandler.class);
 

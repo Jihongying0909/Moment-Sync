@@ -85,6 +85,24 @@ class AuthIntegrationTest {
     }
 
     @Test
+    void adminQueriesOnlyOrdinaryUsersAndFiltersByNicknameAndStatus() throws Exception {
+        jdbc.update("UPDATE `user` SET status = 'DISABLED' WHERE id = 2");
+        String admin = "Bearer " + tokens.issue(1);
+
+        mvc.perform(get("/api/admin/users").header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(2));
+
+        mvc.perform(get("/api/admin/users").header(HttpHeaders.AUTHORIZATION, admin)
+                        .param("keyword", " 小光 ").param("status", "DISABLED").param("pageSize", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(1))
+                .andExpect(jsonPath("$.data.items[0].id").value("2"))
+                .andExpect(jsonPath("$.data.items[0].status").value("DISABLED"))
+                .andExpect(jsonPath("$.data.items[0].length()").value(5));
+    }
+
+    @Test
     void healthChecksTheDatabaseWithoutRequiringLogin() throws Exception {
         mvc.perform(get("/api/health"))
                 .andExpect(status().isOk())

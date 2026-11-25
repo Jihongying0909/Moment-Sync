@@ -43,7 +43,7 @@
 
 新增接口复用 `ApiResponse` 和已定义的错误码，业务校验失败用 `ApiException` 表达。需要新增业务错误码时，在对应接口条目里记录 HTTP 状态、错误码和含义。未预期的异常保留服务端日志，响应只给通用提示。
 
-当前 `ApiExceptionHandler` 覆盖 `auth`、`post` 和 `comment` 包。鉴权过滤器单独处理 `401`、`403`，并使用同一响应结构。接入 `config`、`media`、`admin` 的新业务接口时，统一将它们纳入公共异常处理，并验证各自的错误响应。
+当前 `ApiExceptionHandler` 覆盖 `auth`、`post`、`comment` 和 `admin` 包。鉴权过滤器单独处理 `401`、`403`，并使用同一响应结构。接入 `config`、`media` 的新业务接口时，统一将它们纳入公共异常处理，并验证各自的错误响应。
 
 ## 接口清单
 
@@ -63,7 +63,7 @@
 | 搜索印记 | GET | `/api/posts/search` | 需登录 | 可联调 |
 | 发表评论 | POST | `/api/posts/{id}/comments` | 需登录 | 可联调 |
 | 评论列表 | GET | `/api/posts/{id}/comments` | 需登录 | 可联调 |
-| 后台用户查询 | GET | `/api/admin/users` | 管理员 | 待开发 |
+| 后台用户查询 | GET | `/api/admin/users` | 管理员 | 可联调 |
 | 后台内容列表 | GET | `/api/admin/posts` | 管理员 | 待开发 |
 | 后台内容详情 | GET | `/api/admin/posts/{id}` | 管理员 | 待开发 |
 | 内容下架 | PATCH | `/api/admin/posts/{id}/status` | 管理员 | 待开发 |
@@ -151,7 +151,7 @@ Authorization: Bearer <JWT>
 
 ## 管理后台接口
 
-接口契约待确认。五个接口都需要 `Authorization: Bearer <token>`，且调用者当前必须是启用的管理员（`ACTIVE`、`ADMIN`）。
+五个接口都需要 `Authorization: Bearer <token>`，且调用者当前必须是启用的管理员（`ACTIVE`、`ADMIN`）。
 
 成功统一返回 HTTP `200` 和 `ApiResponse<T>`。ID 在响应中使用字符串，路径中的 `id` 为正整数。所有接口共用下列错误。
 
