@@ -246,6 +246,27 @@ class AuthIntegrationTest {
     }
 
     @Test
+    void bothLoginEndpointsRejectNonStringCredentialsAndUnsupportedMediaTypes() throws Exception {
+        for (String path : new String[]{"/api/auth/login", "/api/admin/auth/login"}) {
+            for (String body : new String[]{
+                    json.writeValueAsString(Map.of("username", "student_a", "password", 12345678)),
+                    json.writeValueAsString(Map.of("username", true, "password", "demo-password"))
+            }) {
+                mvc.perform(post(path).contentType(MediaType.APPLICATION_JSON).content(body))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.code").value(40001));
+            }
+
+            mvc.perform(post(path).contentType(MediaType.TEXT_PLAIN).content("""
+                            {"username":"student_a","password":"demo-password"}
+                            """))
+                    .andExpect(status().isUnsupportedMediaType())
+                    .andExpect(jsonPath("$.code").value(41501))
+                    .andExpect(jsonPath("$.data").isEmpty());
+        }
+    }
+
+    @Test
     void loginAcceptsCorrectCredentialsWhenTheClientStillHasAnInvalidToken() throws Exception {
         setPassword("student_a", "student-password");
         mvc.perform(post("/api/auth/login").header(HttpHeaders.AUTHORIZATION, "Bearer stale-token")
