@@ -3,6 +3,7 @@ package com.momentsync;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -37,6 +38,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
@@ -82,6 +84,176 @@ class AuthIntegrationTest {
                 }
             }
         }
+    }
+
+    @Test
+    void adminQueriesOnlyAccountsAndPostsInTheReviewScope() throws Exception {
+        jdbc.update("UPDATE `user` SET status = 'DISABLED' WHERE id = 2");
+        jdbc.update("UPDATE post SET visibility = 'PRIVATE' WHERE id = 2");
+        jdbc.update("UPDATE post SET status = 'OFFLINE' WHERE id = 3");
+        jdbc.update("""
+                INSERT INTO post (id, user_id, title, content, visibility, status)
+                VALUES (4, 3, '已删除印记', '已删除正文', 'PRIVATE', 'DELETED')
+                """);
+        jdbc.update("INSERT INTO post_media (post_id, media_url) VALUES (2, ?)", "https://example.test/sunset.jpg");
+        String admin = "Bearer " + tokens.issue(1);
+
+        mvc.perform(get("/api/admin/users").header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(2));
+
+        mvc.perform(get("/api/admin/users").header(HttpHeaders.AUTHORIZATION, admin)
+                        .param("keyword", " 小光 ").param("status", "DISABLED").param("pageSize", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(1))
+                .andExpect(jsonPath("$.data.items[0].id").value("2"))
+                .andExpect(jsonPath("$.data.items[0].status").value("DISABLED"))
+                .andExpect(jsonPath("$.data.items[0].length()").value(5));
+
+        mvc.perform(get("/api/admin/posts").header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(3));
+
+        mvc.perform(get("/api/admin/posts").header(HttpHeaders.AUTHORIZATION, admin)
+                        .param("visibility", "PRIVATE").param("status", "PUBLISHED").param("pageSize", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(1))
+                .andExpect(jsonPath("$.data.items[0].id").value("2"))
+                .andExpect(jsonPath("$.data.items[0].visibility").value("PRIVATE"));
+
+        mvc.perform(get("/api/admin/posts").header(HttpHeaders.AUTHORIZATION, admin).param("status", "OFFLINE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[0].id").value("3"));
+
+        mvc.perform(get("/api/admin/posts/2").header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.visibility").value("PRIVATE"))
+                .andExpect(jsonPath("$.data.content").value("运动场旁边的晚霞很漂亮。"))
+                .andExpect(jsonPath("$.data.imageUrl").value("https://example.test/sunset.jpg"))
+                .andExpect(jsonPath("$.data.author.id").value("3"))
+                .andExpect(jsonPath("$.data.tags[0].id").value("2"));
+
+        mvc.perform(get("/api/admin/posts/3").header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("OFFLINE"));
+
+        mvc.perform(get("/api/admin/posts/4").header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(40401));
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    void onlyAdministratorsCanReadPrivatePostsOrTakeThemOffline() throws Exception {
+        jdbc.update("UPDATE post SET visibility = 'PRIVATE' WHERE id = 2");
+        String user = "Bearer " + tokens.issue(2);
+        String admin = "Bearer " + tokens.issue(1);
+
+        try {
+            mvc.perform(get("/api/admin/posts/2"))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.code").value(40101));
+            mvc.perform(get("/api/admin/posts/2").header(HttpHeaders.AUTHORIZATION, user))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.code").value(40301));
+            takeOffline(2, user)
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.code").value(40301));
+
+            mvc.perform(get("/api/admin/posts/2").header(HttpHeaders.AUTHORIZATION, admin))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.status").value("PUBLISHED"));
+            takeOffline(2, admin)
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.status").value("OFFLINE"));
+            mvc.perform(get("/api/admin/posts/2").header(HttpHeaders.AUTHORIZATION, admin))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.visibility").value("PRIVATE"))
+                    .andExpect(jsonPath("$.data.status").value("OFFLINE"));
+        } finally {
+            jdbc.update("UPDATE post SET visibility = 'PUBLIC', status = 'PUBLISHED' WHERE id = 2");
+        }
+    }
+
+    @Test
+    void takingAPostOfflineIsRepeatableAndBlocksPublicSearchAndComments() throws Exception {
+        String admin = "Bearer " + tokens.issue(1);
+        String user = "Bearer " + tokens.issue(2);
+        mvc.perform(get("/api/posts/search").param("keyword", "图书馆").header(HttpHeaders.AUTHORIZATION, user))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[0].id").value("1"));
+        mvc.perform(get("/api/posts/1/comments").header(HttpHeaders.AUTHORIZATION, user))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(1));
+
+        mvc.perform(patch("/api/admin/posts/1/status").header(HttpHeaders.AUTHORIZATION, admin)
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"OFFLINE\"}{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(40001));
+        mvc.perform(get("/api/admin/posts/1").header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("PUBLISHED"));
+
+        takeOffline(1, admin)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value("1"))
+                .andExpect(jsonPath("$.data.status").value("OFFLINE"));
+        takeOffline(1, admin)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("OFFLINE"));
+        mvc.perform(patch("/api/admin/posts/1/status").header(HttpHeaders.AUTHORIZATION, admin)
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"PUBLISHED\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(40001));
+        mvc.perform(get("/api/admin/posts/1").header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("OFFLINE"));
+
+        mvc.perform(get("/api/posts/search").param("keyword", "图书馆").header(HttpHeaders.AUTHORIZATION, user))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(0));
+        mvc.perform(get("/api/posts/1/comments").header(HttpHeaders.AUTHORIZATION, user))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(40401));
+        mvc.perform(post("/api/posts/1/comments").header(HttpHeaders.AUTHORIZATION, user)
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"content\":\"新的留言\"}"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(40401));
+    }
+
+    @Test
+    void adminStatisticsCountTheReviewScopeAndStayStableAfterTakeDown() throws Exception {
+        jdbc.update("UPDATE `user` SET status = 'DISABLED' WHERE id = 2");
+        jdbc.update("UPDATE post SET visibility = 'PRIVATE' WHERE id = 2");
+        jdbc.update("UPDATE post SET status = 'OFFLINE' WHERE id = 3");
+        jdbc.update("""
+                INSERT INTO post (id, user_id, title, content, status)
+                VALUES (4, 3, '已删除印记', '已删除正文', 'DELETED')
+                """);
+        jdbc.update("""
+                INSERT INTO comment (post_id, user_id, content, status) VALUES
+                (1, 3, '已删除评论', 'DELETED'),
+                (3, 3, '下架印记的评论', 'PUBLISHED'),
+                (4, 3, '已删除印记的评论', 'PUBLISHED')
+                """);
+        String admin = "Bearer " + tokens.issue(1);
+
+        expectAdminStatistics(admin);
+        takeOffline(1, admin).andExpect(status().isOk());
+        expectAdminStatistics(admin);
+    }
+
+    private void expectAdminStatistics(String admin) throws Exception {
+        mvc.perform(get("/api/admin/statistics").header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.userCount").value(2))
+                .andExpect(jsonPath("$.data.postCount").value(3))
+                .andExpect(jsonPath("$.data.commentCount").value(3));
+    }
+
+    private ResultActions takeOffline(long id, String bearer) throws Exception {
+        return mvc.perform(patch("/api/admin/posts/{id}/status", id).header(HttpHeaders.AUTHORIZATION, bearer)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"OFFLINE\"}"));
     }
 
     @Test

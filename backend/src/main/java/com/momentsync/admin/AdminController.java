@@ -1,0 +1,99 @@
+package com.momentsync.admin;
+
+import java.io.IOException;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.momentsync.web.ApiException;
+import com.momentsync.web.ApiResponse;
+import com.momentsync.web.PageRequest;
+import com.momentsync.web.PageResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/admin")
+class AdminController {
+    private final AdminRepository admin;
+    private final AdminPostService postService;
+
+    AdminController(AdminRepository admin, AdminPostService postService) {
+        this.admin = admin;
+        this.postService = postService;
+    }
+
+    @GetMapping("/users")
+    ApiResponse<PageResult<AdminRepository.UserRow>> users(@RequestParam(defaultValue = "") String keyword,
+            @RequestParam(required = false) String status, @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+        String query = keyword.strip();
+        if (query.codePointCount(0, query.length()) > 100) {
+            throw ApiException.invalid("关键词最多 100 个字符");
+        }
+        if (status != null && !status.equals("ACTIVE") && !status.equals("DISABLED")) {
+            throw ApiException.invalid("账号状态须为 ACTIVE 或 DISABLED");
+        }
+        return ApiResponse.success(admin.users(query, status, new PageRequest(page, pageSize)));
+    }
+
+    @GetMapping("/posts")
+    ApiResponse<PageResult<AdminRepository.PostRow>> posts(@RequestParam(required = false) String visibility,
+            @RequestParam(required = false) String status, @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+        if (visibility != null && !visibility.equals("PUBLIC") && !visibility.equals("PRIVATE")) {
+            throw ApiException.invalid("可见性须为 PUBLIC 或 PRIVATE");
+        }
+        if (status != null && !status.equals("PUBLISHED") && !status.equals("OFFLINE")) {
+            throw ApiException.invalid("印记状态须为 PUBLISHED 或 OFFLINE");
+        }
+        return ApiResponse.success(admin.posts(visibility, status, new PageRequest(page, pageSize)));
+    }
+
+    @GetMapping("/posts/{id}")
+    ApiResponse<AdminRepository.PostDetail> post(@PathVariable long id) {
+        requirePositiveId(id);
+        return ApiResponse.success(admin.post(id));
+    }
+
+    @PatchMapping("/posts/{id}/status")
+    ApiResponse<AdminPostService.PostStatus> updatePostStatus(@PathVariable long id, @RequestBody StatusRequest request) {
+        requirePositiveId(id);
+        if (!"OFFLINE".equals(request.status())) {
+            throw ApiException.invalid("目标状态须为 OFFLINE");
+        }
+        return ApiResponse.success(postService.takeOffline(id));
+    }
+
+    @GetMapping("/statistics")
+    ApiResponse<AdminRepository.Statistics> statistics() {
+        return ApiResponse.success(admin.statistics());
+    }
+
+    private static void requirePositiveId(long id) {
+        if (id <= 0) {
+            throw ApiException.invalid("印记 ID 必须为正整数");
+        }
+    }
+
+    @JsonDeserialize(using = StatusRequestDeserializer.class)
+    record StatusRequest(String status) {}
+
+    static class StatusRequestDeserializer extends JsonDeserializer<StatusRequest> {
+        @Override
+        public StatusRequest deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            JsonNode body = parser.readValueAsTree();
+            if (!body.isObject() || parser.nextToken() != null) {
+                return context.reportInputMismatch(StatusRequest.class, "请求体须为单个 JSON 对象");
+            }
+            return new StatusRequest(body.path("status").textValue());
+        }
+    }
+}
