@@ -72,6 +72,11 @@ class AdminController {
         return ApiResponse.success(postService.takeOffline(id));
     }
 
+    @GetMapping("/statistics")
+    ApiResponse<AdminRepository.Statistics> statistics() {
+        return ApiResponse.success(admin.statistics());
+    }
+
     private static void requirePositiveId(long id) {
         if (id <= 0) {
             throw ApiException.invalid("印记 ID 必须为正整数");

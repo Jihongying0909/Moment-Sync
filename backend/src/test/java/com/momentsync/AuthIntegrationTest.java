@@ -221,6 +221,36 @@ class AuthIntegrationTest {
                 .andExpect(jsonPath("$.code").value(40401));
     }
 
+    @Test
+    void adminStatisticsCountTheReviewScopeAndStayStableAfterTakeDown() throws Exception {
+        jdbc.update("UPDATE `user` SET status = 'DISABLED' WHERE id = 2");
+        jdbc.update("UPDATE post SET visibility = 'PRIVATE' WHERE id = 2");
+        jdbc.update("UPDATE post SET status = 'OFFLINE' WHERE id = 3");
+        jdbc.update("""
+                INSERT INTO post (id, user_id, title, content, status)
+                VALUES (4, 3, '已删除印记', '已删除正文', 'DELETED')
+                """);
+        jdbc.update("""
+                INSERT INTO comment (post_id, user_id, content, status) VALUES
+                (1, 3, '已删除评论', 'DELETED'),
+                (3, 3, '下架印记的评论', 'PUBLISHED'),
+                (4, 3, '已删除印记的评论', 'PUBLISHED')
+                """);
+        String admin = "Bearer " + tokens.issue(1);
+
+        expectAdminStatistics(admin);
+        takeOffline(1, admin).andExpect(status().isOk());
+        expectAdminStatistics(admin);
+    }
+
+    private void expectAdminStatistics(String admin) throws Exception {
+        mvc.perform(get("/api/admin/statistics").header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.userCount").value(2))
+                .andExpect(jsonPath("$.data.postCount").value(3))
+                .andExpect(jsonPath("$.data.commentCount").value(3));
+    }
+
     private ResultActions takeOffline(long id, String bearer) throws Exception {
         return mvc.perform(patch("/api/admin/posts/{id}/status", id).header(HttpHeaders.AUTHORIZATION, bearer)
                 .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"OFFLINE\"}"));

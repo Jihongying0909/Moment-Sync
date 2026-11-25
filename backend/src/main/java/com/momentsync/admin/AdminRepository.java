@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 class AdminRepository {
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final String USER_SCOPE = "role = 'USER' AND status IN ('ACTIVE', 'DISABLED')";
     private static final String POST_SCOPE = "p.visibility IN ('PUBLIC', 'PRIVATE')"
             + " AND p.status IN ('PUBLISHED', 'OFFLINE')";
 
@@ -32,7 +33,7 @@ class AdminRepository {
     @Transactional(readOnly = true)
     PageResult<UserRow> users(String keyword, String status, PageRequest page) {
         Map<String, Object> filters = new HashMap<>();
-        String from = " FROM `user` WHERE role = 'USER' AND status IN ('ACTIVE', 'DISABLED')";
+        String from = " FROM `user` WHERE " + USER_SCOPE;
         if (!keyword.isEmpty()) {
             String literal = keyword.replace("!", "!!").replace("%", "!%").replace("_", "!_");
             filters.put("keyword", "%" + literal + "%");
@@ -117,6 +118,19 @@ class AdminRepository {
         jdbc.sql("UPDATE post SET status = 'OFFLINE' WHERE id = :id").param("id", id).update();
     }
 
+    Statistics statistics() {
+        return jdbc.sql("""
+                        SELECT
+                            (SELECT COUNT(*) FROM `user` WHERE %s) AS user_count,
+                            (SELECT COUNT(*) FROM post p WHERE %s) AS post_count,
+                            (SELECT COUNT(*) FROM comment c JOIN post p ON p.id = c.post_id
+                             WHERE c.status <> 'DELETED' AND %s) AS comment_count
+                        """.formatted(USER_SCOPE, POST_SCOPE, POST_SCOPE))
+                .query((rs, row) -> new Statistics(rs.getLong("user_count"), rs.getLong("post_count"),
+                        rs.getLong("comment_count")))
+                .single();
+    }
+
     private static ApiException postNotFound() {
         return new ApiException(404, 40401, "印记不存在或已不可见");
     }
@@ -138,4 +152,6 @@ class AdminRepository {
                       String campusLocation) {}
 
     record TagRow(String id, String name) {}
+
+    record Statistics(long userCount, long postCount, long commentCount) {}
 }

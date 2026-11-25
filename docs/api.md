@@ -67,7 +67,7 @@
 | 后台内容列表 | GET | `/api/admin/posts` | 管理员 | 可联调 |
 | 后台内容详情 | GET | `/api/admin/posts/{id}` | 管理员 | 可联调 |
 | 内容下架 | PATCH | `/api/admin/posts/{id}/status` | 管理员 | 可联调 |
-| 后台基础统计 | GET | `/api/admin/statistics` | 管理员 | 待开发 |
+| 后台基础统计 | GET | `/api/admin/statistics` | 管理员 | 可联调 |
 
 ## 账号与登录接口
 
