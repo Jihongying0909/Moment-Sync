@@ -57,9 +57,9 @@
 | 心情配置 | GET | `/api/moods` | 需登录 | 待开发 |
 | 地点配置 | GET | `/api/locations` | 需登录 | 待开发 |
 | 单张图片上传 | POST | `/api/files/images` | 需登录 | 待开发 |
-| 发布印记 | POST | `/api/posts` | 需登录 | 待开发 |
-| 首页印记列表 | GET | `/api/posts` | 需登录 | 待开发 |
-| 印记详情 | GET | `/api/posts/{id}` | 需登录 | 待开发 |
+| 发布印记 | POST | `/api/posts` | 需登录 | 可联调（团队环境待验收） |
+| 首页印记列表 | GET | `/api/posts` | 需登录 | 可联调（团队环境待验收） |
+| 印记详情 | GET | `/api/posts/{id}` | 需登录 | 可联调（团队环境待验收） |
 | 搜索印记 | GET | `/api/posts/search` | 需登录 | 可联调 |
 | 发表评论 | POST | `/api/posts/{id}/comments` | 需登录 | 可联调 |
 | 评论列表 | GET | `/api/posts/{id}/comments` | 需登录 | 可联调 |
@@ -148,6 +148,94 @@ Authorization: Bearer <JWT>
 
 - 标签、心情和地点的取值、图片上传的返回字段及发布请求的图片引用方式待联调确认。发布时检查标题和正文的敏感词。
 - 普通用户在首页、详情和搜索只能看到公开且已发布的印记。下架后，这些入口不再展示该印记，普通用户也无法读取或发布其评论。
+
+## 印记发布、首页与详情
+
+负责人为廖子豪，对接江可妮的印记页面，和陈昂雄核对配置取值及上传图片引用。以下字段按当前 `miniprogram/modules/post/` 调用约定实现，团队环境联调后确认验收。
+
+三个接口均需有效的 Bearer JWT。成功返回 HTTP `200`，响应使用统一的 `ApiResponse<T>`。
+
+### 发布印记
+
+`POST /api/posts` 使用 `Content-Type: application/json`。
+
+| 字段 | JSON 类型 | 必填 | 约定 |
+| --- | --- | --- | --- |
+| `title` | 字符串 | 是 | 去除首尾空白后 1–100 个字符，全空白内容无效 |
+| `content` | 字符串 | 是 | 去除首尾空白后 1–2000 个字符，全空白内容无效 |
+| `imageUrl` | 字符串 | 否 | 上传结果中的图片引用，最多 500 个字符。支持 HTTP(S) URL 或以单个 `/` 开头的站内路径。省略、`null` 或空字符串表示无图 |
+| `mood` | 字符串 | 否 | 配置选项的展示值，最多 30 个字符。省略、`null` 或空字符串表示未选择 |
+| `campusLocation` | 字符串 | 否 | 配置选项的展示值，最多 100 个字符。省略、`null` 或空字符串表示未选择 |
+| `tagIds` | 字符串数组 | 否 | 最多 5 项，每项为正整数 ID 字符串，范围不超过有符号 BIGINT。标签必须存在且为 `ACTIVE`，重复 ID 去重。省略、`null` 或 `[]` 表示无标签 |
+
+文字长度按 Java / JavaScript 的 UTF-16 长度计算，与现有页面一致。心情和地点当前按字符串及长度校验，配置接口提供的候选取值需与陈昂雄联调确认。
+
+```json
+{
+  "title": "校园晚霞",
+  "content": "运动场旁边的晚霞很漂亮。",
+  "imageUrl": "https://example.test/uploads/sunset.jpg",
+  "mood": "开心",
+  "campusLocation": "运动场",
+  "tagIds": ["2", "5"]
+}
+```
+
+作者由后端当前登录身份确定，发布状态为 `PUBLISHED`，可见性为 `PUBLIC`。标题和正文分别通过公共 `ContentPolicy` 检查后，印记、单张图片关联和标签关联在同一事务内保存，任一步失败均回滚。
+
+成功时 `data` 返回完整印记对象，结构见下方示例，必须包含字符串 `id`。新印记的 `commentCount` 为 `0`。前端上传使用 `multipart/form-data` 的 `file` 字段，读取上传返回的 `url` 或 `imageUrl` 后，将引用以 `imageUrl` 字段提交到本接口。上传接口由陈昂雄维护。
+
+### 首页列表
+
+`GET /api/posts?page=1&pageSize=20` 无请求体。`page` 默认 `1`，范围 `1–100000`，`pageSize` 默认 `20`，范围 `1–50`。按 `created_at DESC, id DESC` 排序。
+
+只返回 `PUBLIC + PUBLISHED` 的印记。`data` 为 `{ items, total, page, pageSize }`，其中 `items` 的每项使用下方印记结构，`total` 为公开且已发布的总条数。没有结果或页码超过末页时，`items` 为 `[]`，保留真实 `total`。
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": { "items": [], "total": 0, "page": 1, "pageSize": 20 }
+}
+```
+
+### 详情与公共印记结构
+
+`GET /api/posts/{id}` 无请求体，`id` 为有符号 BIGINT 范围内的正整数。首页、详情和搜索共用可见性规则。找不到印记、已下架、已删除或非公开时，均返回 HTTP `404`、业务码 `40401`。
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "id": "4",
+    "title": "校园晚霞",
+    "content": "运动场旁边的晚霞很漂亮。",
+    "author": { "id": "2", "nickname": "小光", "avatarUrl": null },
+    "imageUrl": "https://example.test/uploads/sunset.jpg",
+    "mood": "开心",
+    "campusLocation": "运动场",
+    "tags": [{ "id": "2", "name": "摄影" }, { "id": "5", "name": "校园生活" }],
+    "commentCount": 0,
+    "createdAt": "2026-11-25 15:00:00"
+  }
+}
+```
+
+印记、作者、标签 ID 一律为字符串。`imageUrl`、`mood`、`campusLocation` 未设置时为 `null`，`tags` 没有有效标签时为 `[]`。标签只展示 `ACTIVE` 项并按 ID 升序排列。`commentCount` 只统计 `PUBLISHED` 评论。`createdAt` 使用数据库时间，格式为 `yyyy-MM-dd HH:mm:ss`。
+
+### 印记接口常见错误
+
+| HTTP 状态 | 业务码 | 场景 |
+| --- | --- | --- |
+| `400` | `40001` | JSON 格式或字段类型错误，标题/正文缺失或超限，可选字段超限，图片引用无效，标签无效或已停用，分页或路径 ID 无效 |
+| `401` | `40101` | 缺少有效登录身份、Token 失效或账号被禁用 |
+| `404` | `40401` | 详情对应的印记不存在或不可见 |
+| `415` | `41501` | 发布请求使用不支持的 Content-Type |
+| `422` | `42201` | 标题或正文命中敏感词，页面展示响应 `message` |
+| `500` | `50001` | 服务异常或数据库写入失败，发布事务回滚 |
+
+页面自动重试或再次提交属于新的发布请求。网络中断后应先刷新首页确认是否已经发布。
 
 ## 管理后台接口
 
