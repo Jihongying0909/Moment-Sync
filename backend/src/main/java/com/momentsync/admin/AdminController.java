@@ -5,6 +5,7 @@ import com.momentsync.web.ApiResponse;
 import com.momentsync.web.PageRequest;
 import com.momentsync.web.PageResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,5 +44,17 @@ class AdminController {
             throw ApiException.invalid("印记状态须为 PUBLISHED 或 OFFLINE");
         }
         return ApiResponse.success(admin.posts(visibility, status, new PageRequest(page, pageSize)));
+    }
+
+    @GetMapping("/posts/{id}")
+    ApiResponse<AdminRepository.PostDetail> post(@PathVariable long id) {
+        requirePositiveId(id);
+        return ApiResponse.success(admin.post(id));
+    }
+
+    private static void requirePositiveId(long id) {
+        if (id <= 0) {
+            throw ApiException.invalid("印记 ID 必须为正整数");
+        }
     }
 }

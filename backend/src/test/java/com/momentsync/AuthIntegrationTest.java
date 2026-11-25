@@ -93,6 +93,7 @@ class AuthIntegrationTest {
                 INSERT INTO post (id, user_id, title, content, visibility, status)
                 VALUES (4, 3, '已删除印记', '已删除正文', 'PRIVATE', 'DELETED')
                 """);
+        jdbc.update("INSERT INTO post_media (post_id, media_url) VALUES (2, ?)", "https://example.test/sunset.jpg");
         String admin = "Bearer " + tokens.issue(1);
 
         mvc.perform(get("/api/admin/users").header(HttpHeaders.AUTHORIZATION, admin))
@@ -121,6 +122,22 @@ class AuthIntegrationTest {
         mvc.perform(get("/api/admin/posts").header(HttpHeaders.AUTHORIZATION, admin).param("status", "OFFLINE"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.items[0].id").value("3"));
+
+        mvc.perform(get("/api/admin/posts/2").header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.visibility").value("PRIVATE"))
+                .andExpect(jsonPath("$.data.content").value("运动场旁边的晚霞很漂亮。"))
+                .andExpect(jsonPath("$.data.imageUrl").value("https://example.test/sunset.jpg"))
+                .andExpect(jsonPath("$.data.author.id").value("3"))
+                .andExpect(jsonPath("$.data.tags[0].id").value("2"));
+
+        mvc.perform(get("/api/admin/posts/3").header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("OFFLINE"));
+
+        mvc.perform(get("/api/admin/posts/4").header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(40401));
     }
 
     @Test
