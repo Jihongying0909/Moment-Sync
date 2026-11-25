@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-@RestControllerAdvice(basePackages = {"com.momentsync.auth", "com.momentsync.post", "com.momentsync.comment",
-        "com.momentsync.admin"})
+@RestControllerAdvice
 class ApiExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
@@ -23,6 +22,16 @@ class ApiExceptionHandler {
     @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class})
     ResponseEntity<ApiResponse<Void>> invalid() {
         return business(ApiException.invalid("请求参数格式不正确"));
+    }
+
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    ResponseEntity<ApiResponse<Void>> tooLarge() {
+        return business(new ApiException(413, 41301, "单张图片不能超过 10MB"));
+    }
+
+    @ExceptionHandler(org.springframework.web.multipart.MultipartException.class)
+    ResponseEntity<ApiResponse<Void>> invalidMultipart() {
+        return business(ApiException.invalid("上传请求格式不正确"));
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
