@@ -24,6 +24,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
@@ -35,13 +36,21 @@ import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration(proxyBeanMethods = false)
 class SecurityConfiguration {
+    private static final RequestMatcher LOGIN_ENDPOINTS = new OrRequestMatcher(
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/auth/login"),
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/admin/auth/login"));
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, AccountAuthentication accounts,
                                             ObjectMapper json, UrlBasedCorsConfigurationSource cors)
@@ -51,6 +60,7 @@ class SecurityConfiguration {
             writeError(response, json, 401, 40101, "请先登录");
         };
 
+        DefaultBearerTokenResolver bearerTokens = new DefaultBearerTokenResolver();
         // The API accepts bearer headers and does not use cookies or server sessions.
         return http.cors(config -> config.configurationSource(cors))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -58,7 +68,7 @@ class SecurityConfiguration {
                 .authorizeHttpRequests(requests -> requests
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/admin/auth/login").permitAll()
+                        .requestMatchers(LOGIN_ENDPOINTS).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().denyAll())
@@ -66,6 +76,7 @@ class SecurityConfiguration {
                         .accessDeniedHandler((request, response, exception) ->
                                 writeError(response, json, 403, 40301, "没有操作权限")))
                 .oauth2ResourceServer(server -> server.authenticationEntryPoint(unauthorized)
+                        .bearerTokenResolver(request -> LOGIN_ENDPOINTS.matches(request) ? null : bearerTokens.resolve(request))
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(accounts::authenticate)))
                 .build();
     }
@@ -80,6 +91,11 @@ class SecurityConfiguration {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", configuration);
         return source;
+    }
+
+    @Bean
+    BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean

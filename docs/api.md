@@ -36,22 +36,23 @@
 | `401` | `40101` | 缺少有效的登录身份 |
 | `403` | `40301` | 已登录，角色权限不足 |
 | `404` | `40401` | 印记不存在或当前用户不可见 |
+| `415` | `41501` | 请求的 `Content-Type` 不受支持 |
 | `422` | `42201` | 内容命中敏感词 |
 | `500` | `50001` | 未预期的服务异常 |
 | `503` | `50301` | 健康检查发现数据库不可用 |
 
 新增接口复用 `ApiResponse` 和已定义的错误码，业务校验失败用 `ApiException` 表达。需要新增业务错误码时，在对应接口条目里记录 HTTP 状态、错误码和含义。未预期的异常保留服务端日志，响应只给通用提示。
 
-当前 `ApiExceptionHandler` 覆盖 `post` 和 `comment` 包。鉴权过滤器单独处理 `401`、`403`，并使用同一响应结构。接入 `auth`、`config`、`media`、`admin` 的新业务接口时，统一将它们纳入公共异常处理，并验证各自的错误响应。
+当前 `ApiExceptionHandler` 覆盖 `auth`、`post` 和 `comment` 包。鉴权过滤器单独处理 `401`、`403`，并使用同一响应结构。接入 `config`、`media`、`admin` 的新业务接口时，统一将它们纳入公共异常处理，并验证各自的错误响应。
 
 ## 接口清单
 
 | 功能 | 方法 | 路径 | 权限 | 状态 |
 | --- | --- | --- | --- | --- |
 | 健康检查 | GET | `/api/health` | 公开 | 可联调 |
-| 普通用户登录 | POST | `/api/auth/login` | 公开 | 待开发 |
-| 当前用户信息 | GET | `/api/users/me` | 需登录 | 待开发 |
-| 管理员登录 | POST | `/api/admin/auth/login` | 公开，登录时校验管理员角色 | 待开发 |
+| 普通用户登录 | POST | `/api/auth/login` | 公开 | 可联调 |
+| 当前用户信息 | GET | `/api/users/me` | 需登录 | 可联调 |
+| 管理员登录 | POST | `/api/admin/auth/login` | 公开，登录时校验管理员角色 | 可联调 |
 | 标签配置 | GET | `/api/tags` | 需登录 | 待开发 |
 | 心情配置 | GET | `/api/moods` | 需登录 | 待开发 |
 | 地点配置 | GET | `/api/locations` | 需登录 | 待开发 |
@@ -68,6 +69,76 @@
 | 内容下架 | PATCH | `/api/admin/posts/{id}/status` | 管理员 | 待开发 |
 | 后台基础统计 | GET | `/api/admin/statistics` | 管理员 | 待开发 |
 
+## 账号与登录接口
+
+### 普通用户登录与管理员登录
+
+| 方法 | 路径 | 权限 |
+| --- | --- | --- |
+| POST | `/api/auth/login` | 无需登录 |
+| POST | `/api/admin/auth/login` | 无需登录，账号需具备管理员角色 |
+
+请求使用 `Content-Type: application/json`。`username` 和 `password` 都是必填的 JSON 字符串。`username` 去除首尾空白后最多 50 个字符。`password` 按原样校验，UTF-8 编码最长 72 字节。
+
+```json
+{"username":"student_a","password":"<本地演示密码>"}
+```
+
+两个入口共用 BCrypt 密码校验和 JWT 签发，成功响应结构相同。登录按账号密码校验，请求携带的旧令牌不参与登录。管理员登录时使用管理员账号，响应中的 `role` 为 `ADMIN`。
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "token": "<JWT>",
+    "user": {
+      "id": "2",
+      "username": "student_a",
+      "nickname": "小光",
+      "avatarUrl": null,
+      "role": "USER"
+    }
+  }
+}
+```
+
+`token` 有效期为 2 小时，前端保存原始令牌，在后续请求中使用 `Authorization: Bearer <token>`。`user.id` 为字符串，`avatarUrl` 未配置时为 `null`，`role` 为 `USER` 或 `ADMIN`。
+
+### 当前用户信息
+
+`GET /api/users/me` 需要 Bearer JWT，无请求体和查询参数。`data` 直接返回用户信息，不包装在 `user` 字段下。
+
+```http
+GET /api/users/me
+Authorization: Bearer <JWT>
+```
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "id": "2",
+    "username": "student_a",
+    "nickname": "小光",
+    "avatarUrl": null,
+    "role": "USER"
+  }
+}
+```
+
+### 账号接口常见错误
+
+| 接口 | HTTP 状态 / 业务码 | 场景 |
+| --- | --- | --- |
+| 两个登录接口 | `400 / 40001` | JSON 格式错误、账号或密码缺失、字段类型错误、长度超限 |
+| 两个登录接口 | `401 / 40101` | 账号或密码不正确，或账号不可使用 |
+| 管理员登录 | `403 / 40301` | 账号密码正确，但账号没有管理员权限 |
+| 两个登录接口 | `415 / 41501` | 请求使用不支持的 `Content-Type`，例如 `text/plain` |
+| 当前用户信息 | `401 / 40101` | 令牌缺失、无效、过期，或账号已禁用 |
+| 所有账号接口 | `500 / 50001` | 服务暂时不可用 |
+
 ## 已实现接口
 
 - 健康检查连库成功时返回 HTTP `200` 和 `data.database: UP`，连库失败时返回 HTTP `503` 和错误码 `50301`。
@@ -75,7 +146,6 @@
 
 ## 待开发接口的联调约定
 
-- 普通用户登录和管理员登录共用 BCrypt 密码校验及 JWT 签发逻辑。管理员登录还需检查账号角色。
 - 标签、心情和地点的取值、图片上传的返回字段及发布请求的图片引用方式待联调确认。发布时检查标题和正文的敏感词。
 - 普通用户在首页、详情和搜索只能看到公开且已发布的印记。下架后，这些入口不再展示该印记，普通用户也无法读取或发布其评论。
 
