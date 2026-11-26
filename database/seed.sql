@@ -20,13 +20,15 @@ INSERT IGNORE INTO post
 VALUES
   (1, 2, '图书馆学习记录', '今天完成了软件工程项目的需求整理。', '平静', '图书馆', 'PUBLIC', 'PUBLISHED'),
   (2, 3, '校园晚霞', '运动场旁边的晚霞很漂亮。', '开心', '运动场', 'PUBLIC', 'PUBLISHED'),
-  (3, 2, '志愿活动准备', '和同学一起准备周末志愿活动。', '期待', '活动中心', 'PUBLIC', 'PUBLISHED');
+  (3, 2, '志愿活动准备', '和同学一起准备周末志愿活动。', '期待', '活动中心', 'PUBLIC', 'PUBLISHED'),
+  (4, 3, '校园代课广告（演示下架用）', '本条为第一周 Demo 预置违规演示内容，用于在管理后台演示下架并验证小程序端立即隐藏。', '平静', '教学楼', 'PUBLIC', 'PUBLISHED');
 
 INSERT IGNORE INTO post_tag (post_id, tag_id) VALUES
   (1, 1),
   (2, 2),
   (2, 5),
-  (3, 3);
+  (3, 3),
+  (4, 5);
 
 INSERT IGNORE INTO comment (id, post_id, user_id, content) VALUES
   (1, 1, 3, '一起加油，期待看到最终成果！'),

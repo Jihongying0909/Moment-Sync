@@ -1,6 +1,11 @@
 <view class="notebook">
-  <view class="eyebrow">拾光同频 / 校园记忆</view>
-  <view class="heading">此刻的<text class="marker">光</text></view>
+  <view class="brand-hero">
+    <brand-logo />
+    <view class="brand-hero__text">
+      <view class="eyebrow">拾光同频 / 校园记忆</view>
+      <view class="heading">此刻的<text class="marker">光</text></view>
+    </view>
+  </view>
   <view class="subtitle">把校园里的小事，写进同一本时光笔记本。</view>
 
   <view class="search-slot">

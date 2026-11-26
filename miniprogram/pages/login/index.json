@@ -1,1 +1,7 @@
-{"navigationBarTitleText":"登录拾光","backgroundColor":"#f7f3e8"}
+{
+  "navigationBarTitleText": "登录拾光",
+  "backgroundColor": "#f7f3e8",
+  "usingComponents": {
+    "brand-logo": "/components/brand-logo/index"
+  }
+}

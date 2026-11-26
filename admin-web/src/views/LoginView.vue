@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import BrandLogo from '../components/BrandLogo.vue'
 import { useAuthStore } from '../stores/auth.js'
 
 const route = useRoute()
@@ -30,11 +31,11 @@ async function submit() {
   <main class="login-page">
     <section class="login-intro">
       <span class="eyebrow">Moment Sync</span>
-      <h1>让每一段校园记忆<br />都有清晰的守护</h1>
+      <h1>让每一段<span class="marker">校园记忆</span><br />都有清晰的守护</h1>
       <p>拾光同频管理后台用于查看平台运行情况、管理用户与审核公开内容。</p>
     </section>
     <section class="login-card">
-      <div class="login-card__heading"><span class="brand__mark">拾</span><div><h2>管理员登录</h2><p>请使用管理员账号进入后台</p></div></div>
+      <div class="login-card__heading"><BrandLogo :size="50" /><div><h2>管理员登录</h2><p>请使用管理员账号进入后台</p></div></div>
       <p v-if="expired" class="notice notice--warning">登录状态已失效，请重新登录。</p>
       <form @submit.prevent="submit">
         <label>账号<input v-model="username" name="username" autocomplete="username" placeholder="请输入管理员账号" /></label>

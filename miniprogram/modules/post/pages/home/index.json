@@ -1,1 +1,10 @@
-{"navigationBarTitleText":"拾光同频","enablePullDownRefresh":true,"backgroundColor":"#f7f3e8","usingComponents":{"post-card":"/modules/post/components/post-card/index","search-entry":"/modules/search-comment/components/search-entry/index"}}
+{
+  "navigationBarTitleText": "拾光同频",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#f7f3e8",
+  "usingComponents": {
+    "brand-logo": "/components/brand-logo/index",
+    "post-card": "/modules/post/components/post-card/index",
+    "search-entry": "/modules/search-comment/components/search-entry/index"
+  }
+}

@@ -1,6 +1,11 @@
 <view class="notebook">
-  <view class="eyebrow">拾光同频 / 身份验证</view>
-  <view class="heading">翻开你的<text class="marker">时光本</text></view>
+  <view class="brand-hero">
+    <brand-logo />
+    <view class="brand-hero__text">
+      <view class="eyebrow">拾光同频 / 身份验证</view>
+      <view class="heading">翻开你的<text class="marker">时光本</text></view>
+    </view>
+  </view>
   <view class="subtitle">使用校园演示账号登录，记录与重遇此刻的日常。</view>
 
   <view class="paper login-card">

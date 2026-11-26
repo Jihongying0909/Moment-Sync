@@ -1,0 +1,24 @@
+<view class="logo-badge logo-badge--{{size}}" aria-label="拾光同频图标">
+  <view class="logo-glow"></view>
+
+  <view class="logo-card-shadow"></view>
+
+  <view class="logo-card">
+    <view class="logo-photo">
+      <view class="logo-sun"></view>
+      <view class="logo-hill logo-hill--back"></view>
+      <view class="logo-hill logo-hill--front"></view>
+    </view>
+  </view>
+
+  <view class="logo-sparkle logo-sparkle--main">
+    <view class="logo-sparkle-fill logo-sparkle-fill--main"></view>
+  </view>
+
+  <view class="logo-sparkle logo-sparkle--sub">
+    <view class="logo-sparkle-fill logo-sparkle-fill--sub"></view>
+  </view>
+
+  <view class="logo-wave logo-wave--1"></view>
+  <view class="logo-wave logo-wave--2"></view>
+</view>

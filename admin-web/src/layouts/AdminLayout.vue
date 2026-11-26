@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import BrandLogo from '../components/BrandLogo.vue'
 import { useAuthStore } from '../stores/auth.js'
 
 const route = useRoute()
@@ -31,7 +32,7 @@ onUnmounted(() => window.removeEventListener('admin-session-expired', handleExpi
   <div class="app-shell">
     <aside class="sidebar" :class="{ 'sidebar--open': mobileOpen }">
       <div class="brand">
-        <span class="brand__mark">拾</span>
+        <BrandLogo :size="44" />
         <div><strong>拾光同频</strong><span>管理后台</span></div>
       </div>
       <nav class="nav-list" aria-label="后台导航">
