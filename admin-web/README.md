@@ -18,7 +18,7 @@ npm run dev
 
 访问 `http://localhost:5173`。开发服务器会将 `/api` 代理到后端 `http://localhost:8080`。
 
-如需连接其他后端，复制 `.env.example` 为 `.env.local`，修改 `VITE_API_BASE_URL`。
+如需连接其他后端，复制 `.env.example` 为 `.env.local`，修改 `VITE_API_BASE_URL`（直连后端时需包含 `/api` 前缀，例如 `http://localhost:8080/api`）。
 
 ## 后端接口
 
@@ -31,7 +31,7 @@ npm run dev
 | 内容详情 | `GET /api/admin/posts/{id}` |
 | 内容下架 | `PATCH /api/admin/posts/{id}/status` |
 
-后台详情接口当前由前端按 `GET /api/admin/posts/{id}` 接入；后端最终路径若有调整，只需修改 `src/api/admin.js`。
+后台详情接口已与后端 `GET /api/admin/posts/{id}` 契约对齐；管理后台整体视觉采用与微信小程序端统一的纸张手账设计语言及动态品牌图标。
 
 所有 BIGINT ID 都按字符串保存和传递。接口使用统一 `{ code, message, data }` 响应，`40101` 会清除管理员会话并跳转登录页，`40301` 会显示权限不足。
 

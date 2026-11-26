@@ -21,7 +21,7 @@ onMounted(() => load())
 <template>
   <section>
     <div class="section-heading"><div><h2>用户管理</h2><p>查看平台注册用户及账号状态</p></div></div>
-    <form class="filter-bar" @submit.prevent="search"><input v-model="query.keyword" placeholder="搜索账号或昵称" /><select v-model="query.status"><option value="">全部状态</option><option value="ACTIVE">正常</option><option value="DISABLED">已禁用</option></select><button class="primary-button" type="submit" :disabled="loading">查询</button></form>
+    <form class="filter-bar" @submit.prevent="search"><input v-model="query.keyword" placeholder="搜索账号或昵称" /><select v-model="query.status" @change="search"><option value="">全部状态</option><option value="ACTIVE">正常</option><option value="DISABLED">已禁用</option></select><button class="primary-button" type="submit" :disabled="loading">查询</button></form>
     <FeedbackState v-if="error" title="用户列表加载失败" :description="error" action-label="重新加载" @action="load()" />
     <div v-else class="table-card">
       <div class="table-scroll"><table><thead><tr><th>用户</th><th>账号</th><th>角色</th><th>状态</th><th>注册时间</th></tr></thead>

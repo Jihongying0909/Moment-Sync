@@ -24,6 +24,18 @@ button {
   color: #6c6c61;
 }
 
+.brand-hero {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  margin-bottom: 10rpx;
+}
+
+.brand-hero__text {
+  min-width: 0;
+  flex: 1;
+}
+
 .heading {
   margin: 12rpx 0 6rpx;
   font-size: 46rpx;

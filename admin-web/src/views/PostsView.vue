@@ -10,6 +10,7 @@ const query = reactive({ visibility: '', status: '', page: 1, pageSize: 10 })
 const result = ref({ items: [], total: 0, page: 1, pageSize: 10 })
 const loading = ref(false)
 const error = ref('')
+const actionError = ref('')
 const selected = ref(null)
 const updating = ref(false)
 const toast = ref('')
@@ -21,9 +22,9 @@ async function load(page = query.page) {
 function search() { load(1) }
 async function offline() {
   if (!selected.value) return
-  updating.value = true
+  updating.value = true; actionError.value = ''; toast.value = ''
   try { await updatePostStatus(selected.value.id, 'OFFLINE'); toast.value = '内容已下架'; selected.value = null; await load() }
-  catch (err) { error.value = err.message } finally { updating.value = false }
+  catch (err) { actionError.value = err.message; selected.value = null } finally { updating.value = false }
 }
 onMounted(() => load())
 </script>
@@ -32,7 +33,8 @@ onMounted(() => load())
   <section>
     <div class="section-heading"><div><h2>内容管理</h2><p>查看公开印记并处理需要下架的内容</p></div></div>
     <p v-if="toast" class="notice notice--success">{{ toast }}</p>
-    <form class="filter-bar" @submit.prevent="search"><select v-model="query.visibility"><option value="">全部可见范围</option><option value="PUBLIC">公开</option><option value="PRIVATE">私密</option></select><select v-model="query.status"><option value="">全部状态</option><option value="PUBLISHED">已发布</option><option value="OFFLINE">已下架</option></select><button class="primary-button" type="submit" :disabled="loading">查询</button></form>
+    <p v-if="actionError" class="notice notice--danger" role="alert">{{ actionError }}</p>
+    <form class="filter-bar" @submit.prevent="search"><select v-model="query.visibility" @change="search"><option value="">全部可见范围</option><option value="PUBLIC">公开</option><option value="PRIVATE">私密</option></select><select v-model="query.status" @change="search"><option value="">全部状态</option><option value="PUBLISHED">已发布</option><option value="OFFLINE">已下架</option></select><button class="primary-button" type="submit" :disabled="loading">查询</button></form>
     <FeedbackState v-if="error" title="内容列表加载失败" :description="error" action-label="重新加载" @action="load()" />
     <div v-else class="table-card"><div class="table-scroll"><table><thead><tr><th>印记</th><th>发布者</th><th>可见范围</th><th>状态</th><th>发布时间</th><th>操作</th></tr></thead>
       <tbody><tr v-if="loading"><td colspan="6" class="table-message">正在加载内容数据…</td></tr><tr v-else-if="!result.items.length"><td colspan="6" class="table-message">暂无符合条件的内容</td></tr>

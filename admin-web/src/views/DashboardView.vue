@@ -25,6 +25,6 @@ onMounted(load)
       <StatCard label="印记总数" :value="stats.postCount" tone="violet" />
       <StatCard label="评论总数" :value="stats.commentCount" tone="green" />
     </div>
-    <article class="content-card progress-card"><div><span class="eyebrow">第一周 Demo</span><h3>管理链路待联调</h3><p>管理员下架内容后，需要联合验证小程序首页、搜索、详情和评论立即隐藏或拒绝访问。</p></div><RouterLink class="primary-button" to="/posts">进入内容管理</RouterLink></article>
+    <article class="content-card progress-card"><div><span class="eyebrow">内容治理</span><h3>校园印记审核与下架</h3><p>支持查看平台公开与私密印记，下架内容后小程序首页、搜索、详情及评论入口将立即同步隐藏或拦截。</p></div><RouterLink class="primary-button" to="/posts">进入内容管理</RouterLink></article>
   </section>
 </template>
