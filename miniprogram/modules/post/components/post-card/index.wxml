@@ -1,0 +1,15 @@
+<view class="post-card paper" bindtap="open" hover-class="card-hover" aria-label="查看印记：{{post.title}}">
+  <image wx:if="{{post.imageUrl}}" class="post-image" src="{{post.imageUrl}}" mode="aspectFill" />
+  <view class="post-body">
+    <view class="post-meta">{{post.author.nickname}} · {{post.createdAt}}</view>
+    <view class="post-title">{{post.title}}</view>
+    <view wx:if="{{showExcerpt}}" class="post-content">{{post.content}}</view>
+    <view wx:if="{{post.tags.length}}" class="post-tags">
+      <text wx:for="{{post.tags}}" wx:key="id" wx:for-item="tag" class="inline-tag"># {{tag.name}}</text>
+    </view>
+    <view class="post-footer">
+      <text>{{post.campusLocation || '校园一隅'}}{{post.mood ? ' · ' + post.mood : ''}}</text>
+      <text>{{post.commentCount}} 条评论</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,93 @@
+.picker {
+  margin-bottom: 24rpx;
+  color: #302d28;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+.picker-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 14rpx;
+}
+.picker-label {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #3f423a;
+}
+.picker-tools {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.picker-meta {
+  font-size: 23rpx;
+  color: #6c6c61;
+}
+.picker-clear {
+  margin: 0;
+  padding: 4rpx 8rpx;
+  min-height: 0;
+  background: transparent;
+  border: 0;
+  color: #506346;
+  font-size: 23rpx;
+  line-height: 1.4;
+  text-decoration: underline;
+}
+.picker-clear::after,
+.picker-chip::after {
+  border: 0;
+}
+.picker-chips {
+  display: flex;
+  flex-wrap: wrap;
+}
+.picker-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 12rpx 12rpx 0;
+  padding: 10rpx 24rpx;
+  min-height: 64rpx;
+  background: #fffdf6;
+  color: #504d46;
+  border: 2rpx solid #9aa08f;
+  border-radius: 14rpx 8rpx 14rpx 8rpx;
+  font-size: 25rpx;
+  line-height: 1.3;
+}
+.picker-chip.selected {
+  background: #dce7cf;
+  border-color: #4d5146;
+  color: #26301f;
+  font-weight: 600;
+}
+.picker-chip.mood-selected {
+  background: #f2e4ad;
+  border-color: #4d5146;
+  color: #302d28;
+  font-weight: 600;
+}
+.picker-chip[disabled] {
+  color: #8b8c80;
+  background: #eeece3;
+  border-color: #c5c8bc;
+}
+.picker-chip:active {
+  transform: translateY(2rpx);
+}
+.chip-prefix {
+  margin-right: 6rpx;
+  color: #60754e;
+}
+.picker-empty {
+  font-size: 25rpx;
+  color: #6c6c61;
+  line-height: 1.6;
+}
+.picker-hint {
+  margin-top: 6rpx;
+  font-size: 23rpx;
+  color: #a03e2c;
+}

@@ -1,0 +1,29 @@
+<view class="notebook">
+  <view class="eyebrow">拾光同频 / 个人中心</view>
+  <view class="heading">我的<text class="marker">扉页</text></view>
+  <view class="subtitle">管理当前登录身份，随时继续记录校园日常。</view>
+
+  <view wx:if="{{authenticated}}" class="paper profile-card">
+    <view class="profile-head">
+      <image wx:if="{{user && user.avatarUrl}}" class="avatar" src="{{user.avatarUrl}}" mode="aspectFill" aria-label="用户头像" />
+      <view wx:else class="avatar avatar-fallback">{{avatarInitial}}</view>
+      <view class="profile-meta">
+        <view class="nickname">{{(user && user.nickname) || '校园同学'}}</view>
+        <view wx:if="{{user && user.username}}" class="muted">@{{user.username}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{error}}" class="error profile-error">{{error}}</view>
+
+    <view class="profile-actions">
+      <button class="button primary action-btn" bindtap="onOpenPublish">＋ 写下新印记</button>
+      <button class="button danger action-btn" bindtap="onLogout">退出登录</button>
+    </view>
+  </view>
+
+  <view wx:else class="paper state">
+    <view class="guest-title">尚未登录拾光笔记本</view>
+    <view class="muted">登录后即可浏览校园印记、发布日常与参与同频留言。</view>
+    <button class="button primary login-btn" bindtap="onGoLogin">前往登录</button>
+  </view>
+</view>

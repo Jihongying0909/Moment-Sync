@@ -1,0 +1,220 @@
+/* 拾光同频动态手账图标：纯原生 WXSS 实现，与 Web 管理后台保持统一视觉与常驻微动效 */
+.logo-badge {
+  position: relative;
+  width: 96rpx;
+  height: 96rpx;
+  box-sizing: border-box;
+  background: #f7f3e8;
+  border: 3rpx solid #4d5146;
+  border-radius: 26rpx 16rpx 26rpx 18rpx;
+  box-shadow: 5rpx 6rpx 0 #d8decf;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.logo-badge--sm {
+  transform: scale(0.86);
+  transform-origin: left center;
+}
+
+.logo-glow {
+  position: absolute;
+  left: 14rpx;
+  top: 14rpx;
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: rgba(242, 228, 173, 0.36);
+}
+
+.logo-card-shadow {
+  position: absolute;
+  left: 19rpx;
+  top: 25rpx;
+  width: 48rpx;
+  height: 52rpx;
+  border-radius: 10rpx;
+  background: #d8decf;
+  transform: rotate(-8deg);
+  animation: momentShadowFloat 3.6s ease-in-out infinite;
+}
+
+.logo-card {
+  position: absolute;
+  left: 22rpx;
+  top: 21rpx;
+  width: 48rpx;
+  height: 52rpx;
+  padding: 6rpx 6rpx 13rpx;
+  box-sizing: border-box;
+  background: #fffdf6;
+  border: 3rpx solid #4d5146;
+  border-radius: 10rpx;
+  transform: rotate(-8deg);
+  animation: momentCardFloat 3.6s ease-in-out infinite;
+}
+
+.logo-photo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  background: #f2e4ad;
+  border: 2.5rpx solid #4d5146;
+  border-radius: 4rpx;
+  overflow: hidden;
+}
+
+.logo-sun {
+  position: absolute;
+  left: 7rpx;
+  top: 6rpx;
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: #e5987e;
+  animation: momentSunPulse 2.8s ease-in-out infinite;
+}
+
+.logo-hill {
+  position: absolute;
+  bottom: -10rpx;
+  border-radius: 50%;
+  border-top: 2.5rpx solid #4d5146;
+}
+
+.logo-hill--back {
+  left: -8rpx;
+  width: 30rpx;
+  height: 20rpx;
+  background: #dce7cf;
+}
+
+.logo-hill--front {
+  right: -8rpx;
+  width: 32rpx;
+  height: 22rpx;
+  background: #c7d8b6;
+}
+
+.logo-sparkle {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #4d5146;
+  clip-path: polygon(50% 0%, 64% 36%, 100% 50%, 64% 64%, 50% 100%, 36% 64%, 0% 50%, 36% 36%);
+}
+
+.logo-sparkle--main {
+  right: 14rpx;
+  top: 10rpx;
+  width: 24rpx;
+  height: 24rpx;
+  animation: momentTwinkle 2.2s ease-in-out infinite;
+}
+
+.logo-sparkle--sub {
+  right: 6rpx;
+  top: 28rpx;
+  width: 16rpx;
+  height: 16rpx;
+  animation: momentTwinkle 2.2s ease-in-out 0.9s infinite;
+}
+
+.logo-sparkle-fill {
+  width: 68%;
+  height: 68%;
+  clip-path: polygon(50% 0%, 64% 36%, 100% 50%, 64% 64%, 50% 100%, 36% 64%, 0% 50%, 36% 36%);
+}
+
+.logo-sparkle-fill--main {
+  background: #f2e4ad;
+}
+
+.logo-sparkle-fill--sub {
+  background: #e5987e;
+}
+
+.logo-wave {
+  position: absolute;
+  box-sizing: border-box;
+  border: 3rpx solid transparent;
+  border-top-color: #4d5146;
+  border-right-color: #4d5146;
+  border-radius: 50%;
+  transform-origin: bottom left;
+}
+
+.logo-wave--1 {
+  right: 8rpx;
+  top: 10rpx;
+  width: 22rpx;
+  height: 22rpx;
+  animation: momentSyncWave 2s ease-out infinite;
+}
+
+.logo-wave--2 {
+  right: 2rpx;
+  top: 4rpx;
+  width: 32rpx;
+  height: 32rpx;
+  animation: momentSyncWave 2s ease-out 0.55s infinite;
+}
+
+@keyframes momentCardFloat {
+  0%, 100% {
+    transform: rotate(-8deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-5deg) translateY(-4rpx);
+  }
+}
+
+@keyframes momentShadowFloat {
+  0%, 100% {
+    transform: rotate(-8deg) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: rotate(-7deg) translate(2rpx, 2rpx) scale(0.95);
+    opacity: 0.7;
+  }
+}
+
+@keyframes momentSunPulse {
+  0%, 100% {
+    transform: scale(0.9);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.22);
+    opacity: 1;
+  }
+}
+
+@keyframes momentTwinkle {
+  0%, 100% {
+    transform: scale(0.68) rotate(0deg);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.2) rotate(22deg);
+    opacity: 1;
+  }
+}
+
+@keyframes momentSyncWave {
+  0% {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+}

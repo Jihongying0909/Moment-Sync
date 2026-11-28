@@ -1,0 +1,37 @@
+<view class="notebook">
+  <view class="eyebrow">拾光同频 / 校园记忆</view>
+  <view class="heading">寻找<text class="marker">那一刻</text></view>
+  <view class="subtitle">从一个词开始，重遇校园里的小事。</view>
+  <view class="paper search-paper">
+    <view class="field-label">标题或正文关键词</view>
+    <view class="search-row">
+      <input class="search-input" value="{{keyword}}" maxlength="100" placeholder="例如：图书馆、晚霞" confirm-type="search" bindinput="onInput" bindconfirm="onConfirm" aria-label="搜索标题或正文" />
+      <button class="button primary" bindtap="onConfirm" loading="{{loading}}">寻找</button>
+    </view>
+    <view class="field-label tag-label">按标签找一找</view>
+    <view class="tags">
+      <button class="chip {{tagId === '' ? 'selected' : ''}}" data-id="" bindtap="onTag" aria-label="全部标签">全部</button>
+      <button wx:for="{{tags}}" wx:key="id" class="chip {{tagId === item.id ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="onTag">{{item.name}}</button>
+    </view>
+    <view wx:if="{{tagsLoading}}" class="muted">正在读取标签…</view>
+    <view wx:if="{{tagsError}}" class="error"><text>{{tagsError}}</text><button class="link-button" bindtap="loadTags">重新加载标签</button></view>
+  </view>
+  <view class="result-heading"><text>时光索引</text><text class="muted">{{searched ? total + ' 条印记' : '等待寻找'}}</text></view>
+  <view wx:if="{{error}}" class="paper state error"><text>{{error}}</text><button class="button" bindtap="onRetry">重试</button></view>
+  <view wx:if="{{loading && page === 0}}" class="paper state">正在翻阅校园时光…</view>
+  <view wx:if="{{searched && !loading && !error && total === 0}}" class="paper state">
+    <view class="empty-mark">⌕</view><view class="empty-title">这页时光还没找到</view>
+    <view class="muted">换个关键词，或试试其他标签。</view><button class="button" bindtap="onClear">清空筛选</button>
+  </view>
+  <button wx:for="{{items}}" wx:key="id" class="paper post-card" data-id="{{item.id}}" bindtap="onOpen" aria-label="查看印记：{{item.title}}">
+    <image wx:if="{{item.imageUrl}}" class="post-image" src="{{item.imageUrl}}" mode="aspectFill" />
+    <view class="post-body">
+      <view class="post-meta">{{item.author.nickname}} · {{item.createdAt}}</view>
+      <view class="post-title">{{item.title}}</view><view class="post-content">{{item.content}}</view>
+      <view class="post-tags"><text wx:for="{{item.tags}}" wx:for-item="tag" wx:key="id" class="inline-tag"># {{tag.name}}</text></view>
+      <view class="post-footer"><text>{{item.campusLocation || '校园一隅'}}{{item.mood ? ' · ' + item.mood : ''}}</text><text>{{item.commentCount}} 条评论</text></view>
+    </view>
+  </button>
+  <button wx:if="{{hasMore && !error}}" class="button more" bindtap="onMore" disabled="{{loading}}" loading="{{loading}}">{{loading ? '翻页中…' : '再翻一页'}}</button>
+  <view wx:if="{{searched && total > 0 && !hasMore && !loading}}" class="end-note">— 这一页时光，已翻到底 —</view>
+</view>

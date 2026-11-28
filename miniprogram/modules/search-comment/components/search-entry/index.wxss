@@ -1,0 +1,4 @@
+@import "../../style.wxss";
+.search-entry { display: flex; align-items: center; gap: 20rpx; width: 100%; padding: 22rpx 28rpx; background: #fffdf6; border: 2rpx dashed #8b977e; border-radius: 22rpx 14rpx 18rpx 12rpx; font-size: 27rpx; line-height: 1.6; text-align: left; }
+.search-icon { font-size: 40rpx; color: #60754e; }
+.arrow { margin-left: auto; }

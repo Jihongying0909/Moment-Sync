@@ -1,0 +1,31 @@
+@import "../../style.wxss";
+page { background: #f7f3e8; }
+.notebook { padding: 44rpx 32rpx 64rpx; max-width: 1040rpx; margin: auto; }
+.eyebrow { color: #68735c; font-size: 22rpx; letter-spacing: 4rpx; }
+.heading { font-size: 58rpx; font-weight: 700; margin-top: 24rpx; }
+.marker { background: linear-gradient(transparent 58%, #f2df96 58%, #f2df96 91%, transparent 91%); }
+.subtitle { margin: 18rpx 0 38rpx; font-size: 27rpx; color: #68675b; line-height: 1.6; }
+.search-paper { padding: 28rpx; }
+.field-label { font-size: 25rpx; color: #606655; margin-bottom: 18rpx; }
+.search-row { display: flex; align-items: center; gap: 16rpx; }
+.search-input { flex: 1; min-width: 0; height: 86rpx; border-bottom: 2rpx dashed #919783; font-size: 28rpx; }
+.tag-label { margin-top: 30rpx; }
+.tags { display: flex; flex-wrap: wrap; gap: 14rpx; }
+.chip { margin: 0; padding: 14rpx 22rpx; font-size: 25rpx; line-height: 1.4; background: #fffdf6; color: #59624e; border: 2rpx solid #a0a48f; border-radius: 45rpx 36rpx 42rpx 32rpx; }
+.chip.selected { background: #f2df96; border-color: #5b614e; font-weight: 600; }
+.result-heading { display: flex; justify-content: space-between; align-items: center; margin: 42rpx 2rpx 24rpx; font-size: 32rpx; font-weight: 600; }
+.post-card { display: block; width: 100%; margin: 0 0 28rpx; padding: 0; text-align: left; line-height: 1.6; overflow: hidden; }
+.post-image { display: block; width: 100%; height: 310rpx; }
+.post-body { padding: 28rpx; }
+.post-meta { font-size: 22rpx; color: #77796c; }
+.post-title { margin: 14rpx 0; font-weight: 600; font-size: 34rpx; overflow-wrap: anywhere; }
+.post-content { font-size: 27rpx; color: #626456; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; overflow-wrap: anywhere; white-space: pre-wrap; }
+.post-tags { display: flex; flex-wrap: wrap; gap: 14rpx; margin-top: 22rpx; }
+.inline-tag { font-size: 23rpx; color: #5a704a; }
+.post-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12rpx; border-top: 2rpx dashed #dedfd2; padding-top: 20rpx; margin-top: 20rpx; font-size: 23rpx; color: #727366; }
+.state { padding: 46rpx 28rpx; text-align: center; font-size: 28rpx; line-height: 1.8; }
+.state .button { margin-top: 24rpx; }
+.empty-mark { font-size: 72rpx; color: #8c9a79; }
+.empty-title { font-size: 32rpx; font-weight: 600; margin-bottom: 14rpx; }
+.more { display: flex; margin: 32rpx auto; }
+.end-note { margin-top: 38rpx; text-align: center; font-size: 23rpx; color: #858675; }

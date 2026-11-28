@@ -1,0 +1,13 @@
+.login-card {
+  padding: 36rpx 28rpx;
+}
+.field-group {
+  margin-bottom: 26rpx;
+}
+.login-error {
+  margin-bottom: 20rpx;
+}
+.login-submit {
+  width: 100%;
+  margin-top: 8rpx;
+}

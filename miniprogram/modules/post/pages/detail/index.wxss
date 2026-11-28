@@ -1,0 +1,12 @@
+@import "../../style.wxss";
+
+.detail-title { margin: 12rpx 0 8rpx; font-size: 42rpx; font-weight: 700; line-height: 1.35; }
+.detail-meta { margin-bottom: 24rpx; color: #6c6c61; font-size: 24rpx; }
+.detail-image { display: block; width: 100%; margin-bottom: 24rpx; overflow: hidden; }
+.detail-paper { padding: 28rpx 24rpx; }
+.detail-tags { margin-top: 18rpx; }
+.detail-facts { margin-top: 22rpx; padding-top: 18rpx; border-top: 2rpx dashed #cdd2c5; }
+.fact { display: flex; justify-content: space-between; padding: 8rpx 0; font-size: 26rpx; }
+.fact-label { color: #6c6c61; }
+.comments-heading { margin: 32rpx 4rpx 16rpx; font-size: 30rpx; font-weight: 600; }
+.state-action { margin-top: 20rpx; }
