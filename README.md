@@ -50,6 +50,7 @@ Moment-Sync/
 
 ## 文档入口
 
+- [第二周完整功能与前后端任务方案](docs/第二周完整功能与前后端任务方案.md)
 - [第一周需求范围](docs/requirements.md)
 - [第一周前后端分组方案](docs/第一周Demo前后端分组方案.md)
 - [Demo 前端分工](docs/tasks/Demo前端分工.md)

@@ -35,7 +35,10 @@
 | `400` | `40001` | 请求参数不合法或请求体格式错误 |
 | `401` | `40101` | 缺少有效的登录身份 |
 | `403` | `40301` | 已登录，角色权限不足 |
-| `404` | `40401` | 印记不存在或当前用户不可见 |
+| `403` | `40302` | 当前账号已被禁用 |
+| `403` | `40303` | 时光胶囊尚未到达开启时间 |
+| `404` | `40401` | 目标资源不存在或当前用户不可见 |
+| `409` | `40901` | 状态冲突或重复提交（如重复申请好友、重复报名） |
 | `413` | `41301` | 上传图片或请求超过大小限制 |
 | `415` | `41501` | 请求的 `Content-Type` 不受支持 |
 | `422` | `42201` | 内容命中敏感词 |
@@ -491,6 +494,85 @@ GET /api/admin/statistics
 ```
 
 下架操作不影响这三个统计值。鉴权和服务端错误见本节共用错误码。
+
+## 第二周新增与扩展接口契约大纲
+
+> 各后端模块负责人在开发对应模块时，直接在本节对应子表下方按末尾《单个接口记录模板》补充请求/响应示例，保持路径前缀与枚举统一。所有 `BIGINT` ID 一律使用字符串传输。
+
+### 1. 账号扩展、关注与好友关系
+
+| 功能 | 方法 | 路径 | 权限 |
+| --- | --- | --- | --- |
+| 普通用户注册 | POST | `/api/auth/register` | 公开 |
+| 修改登录密码 | PUT | `/api/users/me/password` | 需登录 |
+| 修改个人资料与兴趣标签 | PUT | `/api/users/me/profile` | 需登录 |
+| 查看他人公开主页（含同频度） | GET | `/api/users/{id}/profile` | 需登录 |
+| 关注 / 取消关注用户 | POST / DELETE | `/api/users/{id}/follow` | 需登录 |
+| 关注列表 / 粉丝列表 | GET | `/api/users/{id}/following`、`/followers` | 需登录 |
+| 发起好友申请 / 申请列表 | POST / GET | `/api/friends/requests` | 需登录 |
+| 审批好友申请（通过/拒绝） | PATCH | `/api/friends/requests/{id}` | 需登录 |
+| 好友列表 / 解除好友 | GET / DELETE | `/api/friends`、`/api/friends/{friendId}` | 需登录 |
+
+### 2. 多媒体印记扩展、评分、回响与二级评论
+
+| 功能 | 方法 | 路径 | 权限 |
+| --- | --- | --- | --- |
+| 短视频上传（MP4）与读取 | POST / GET | `/api/files/videos`、`/api/files/videos/{name}` | 上传需登录 / 读取公开 |
+| 编辑 / 删除本人印记 | PUT / DELETE | `/api/posts/{id}` | 需登录（仅作者本人） |
+| 首页分栏流（`tab=latest/following/similar/hot/circle`） | GET | `/api/posts` | 需登录 |
+| 多条件组合搜索（扩展日期/心情/地点/媒体/圈子/排序） | GET | `/api/posts/search` | 需登录 |
+| 印记评分（1～5 星） | PUT | `/api/posts/{id}/rating` | 需登录 |
+| 时光回响与收藏切换（`RESONATE/WARM/FUNNY/CHEER/FAVORITE`） | POST / DELETE | `/api/posts/{id}/reactions` | 需登录 |
+| 发表二级回复 / 删除本人评论 | POST / DELETE | `/api/posts/{id}/comments`、`/api/comments/{commentId}` | 需登录 |
+| 提交内容或评论举报 | POST | `/api/reports` | 需登录 |
+
+### 3. 个人记忆四件套（时光轴 / 故事集 / 胶囊 / 年报）
+
+| 功能 | 方法 | 路径 | 权限 |
+| --- | --- | --- | --- |
+| 个人四维时光轴（时间归档/去年今日/心情统计/校园足迹） | GET | `/api/memories/timeline` | 需登录 |
+| 我的收藏与回响列表 | GET | `/api/memories/favorites` | 需登录 |
+| 时光胶囊列表（未到期隐藏正文与媒体） | GET | `/api/memories/capsules` | 需登录 |
+| 年度拾光报告统计数据 | GET | `/api/memories/annual-report` | 需登录 |
+| 故事集列表 / 创建故事集 | GET / POST | `/api/stories` | 需登录 |
+| 故事集详情 / 编辑 / 删除 | GET / PUT / DELETE | `/api/stories/{id}` | 需登录（作者或好友协作者可添加印记） |
+| 管理故事集好友协作者与印记编排 | POST / DELETE | `/api/stories/{id}/collaborators`、`/posts` | 需登录 |
+
+### 4. 同频圈子、话题、共振、双人时光线与校园搭子
+
+| 功能 | 方法 | 路径 | 权限 |
+| --- | --- | --- | --- |
+| 同频话题详情与聚合印记 | GET | `/api/topics/{tagId}` | 需登录 |
+| 同频圈子列表 / 创建圈子 / 圈子详情 | GET / POST | `/api/circles`、`/api/circles/{id}` | 需登录 |
+| 加入 / 退出圈子 | POST / DELETE | `/api/circles/{id}/members` | 需登录 |
+| 圈主管理圈资料 / 移除圈内印记 / 处理圈内举报 | PUT / DELETE / PATCH | `/api/circles/{id}/manage/*` | 圈主或圈管理员 |
+| 同频用户推荐列表（含加权同频度与共同点） | GET | `/api/social/similar-users` | 需登录 |
+| 时光共振聚合列表 | GET | `/api/social/resonances` | 需登录 |
+| 好友/互关用户双人时光线 | GET | `/api/social/dual-timeline/{otherUserId}` | 需登录 |
+| 校园搭子招募列表 / 发布 / 报名参与 | GET / POST | `/api/buddies`、`/api/buddies/{id}/signup` | 需登录 |
+
+### 5. 即时通讯（好友单聊 + 拉群聊）与站内通知
+
+| 功能 | 方法 / 协议 | 路径 | 权限 |
+| --- | --- | --- | --- |
+| 实时聊天连接（握手参数或首帧携带 JWT） | WebSocket | `/ws/chat` | 需登录 |
+| 会话列表 / 发起单聊或勾选好友拉群聊 | GET / POST | `/api/chats/conversations` | 需登录 |
+| 群聊改名 / 邀请好友入群 / 移出成员 / 退群 | PATCH / POST / DELETE | `/api/chats/conversations/{id}/members` | 群成员 / 群主 |
+| 历史消息分页 / HTTP 发送消息兜底 / 标记已读 | GET / POST / PUT | `/api/chats/conversations/{id}/messages` | 会话成员 |
+| 站内通知列表 / 未读总数 / 一键已读 | GET / PUT | `/api/notifications`、`/api/notifications/read-all` | 需登录 |
+
+### 6. 「拾光助手」智能 Agent 与 Web 后台扩展
+
+| 功能 | 方法 | 路径 | 权限 |
+| --- | --- | --- | --- |
+| 发布文案润色与标签/心情/圈子推荐 | POST | `/api/agent/polish` | 需登录 |
+| 自然语言检索、故事集草稿生成与同频推荐 | POST | `/api/agent/chat` | 需登录 |
+| 后台 ECharts 多维统计大屏数据 | GET | `/api/admin/dashboard` | 管理员 |
+| 后台禁用 / 恢复启用用户 | PATCH | `/api/admin/users/{id}/status` | 管理员 |
+| 后台恢复上架或删除印记 / 查询与删除评论 | PATCH / DELETE / GET | `/api/admin/posts/{id}/status`、`/api/admin/comments` | 管理员 |
+| 后台话题与圈子管理 | GET / PATCH | `/api/admin/circles`、`/api/admin/tags` | 管理员 |
+| 后台举报列表与审核结案 | GET / PATCH | `/api/admin/reports`、`/api/admin/reports/{id}` | 管理员 |
+| 后台敏感词库增删查 / 操作审计日志查询 | GET / POST / DELETE | `/api/admin/sensitive-words`、`/api/admin/audit-logs` | 管理员 |
 
 ## 单个接口记录模板
 
